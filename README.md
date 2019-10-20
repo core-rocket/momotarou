@@ -15,7 +15,7 @@ mbed compile
 リポジトリは```git init```で作ることができます(GitHubのUIから作ることも可能です)．
 GitHubはこの"リポジトリ"をアップロードしておけるサービス(の１つ)です．
 GitHubなどに上がっているリポジトリのことを"リモートリポジトリ"と呼びます．
-このプロジェクトで言うとhttps://github.com/core-rocket/momotarouです．
+このプロジェクトで言うとhttps://github.com/core-rocket/momotarou です．
 ```git clone```で既にあるリモートリポジトリをローカルに持ってくることができます．
 
 ### 編集
@@ -50,6 +50,6 @@ commitしたら，```git log```を見てみましょう．
 
 それをするのが```git push```です．
 pushは"ローカルリポジトリ"の変更を"リモートリポジトリ"にアップロードするコマンドです．
-このプロジェクトで言うと，リモートリポジトリはhttps://github.com/core-rocket/momotarouですね．
+このプロジェクトで言うと，リモートリポジトリはhttps://github.com/core-rocket/momotarou ですね．
 
 TODO: fetch, pull, branch, checkout, merge
