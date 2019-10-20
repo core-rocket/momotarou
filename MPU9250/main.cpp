@@ -14,6 +14,7 @@ Serial pc(PA_9, PA_10, 9600);
 uint8_t whoami;
 int16_t gyr[3], acc[3], mag[3],Temp;
 float gx, gy, gz, ax, ay, az, mx, my, mz;
+float mag_init[3];
 
 MPU9250 mpu = MPU9250(PB_7, PB_6);
 
@@ -29,7 +30,7 @@ int main(){
         //MPU9250とAK8963のCalibrationをここら辺でする
         mpu.initMPU9250(); 
         wait(1.0); //気持ち
-        mpu.initAK8963(float mag_init[3]);
+        mpu.initAK8963(mag_init);
         wait(1.0);
         myled = 1;
         pc.printf("Start.\n\r");
