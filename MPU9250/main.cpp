@@ -18,7 +18,7 @@ float mag_init[3];
 
 MPU9250 mpu = MPU9250(PB_7, PB_6);
 
-int main(){
+vioid main(){
     wait(1.0); //気持ち
     whoami = mpu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
     pc.printf("I AM 0x%x\n\r", whoami); //0x71で正常
