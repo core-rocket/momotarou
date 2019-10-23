@@ -16,6 +16,7 @@ uint8_t whoami_MPU9250,whoami_AK8963;
 int16_t gyr[3], acc[3], mag[3],Temp;
 float gx, gy, gz, ax, ay, az, mx, my, mz;
 float mag_init[3];
+int acc32_t[3];
 
 MPU9250 mpu = MPU9250(PB_7, PB_6);
 
@@ -78,9 +79,18 @@ int main(){
         mpu.readAccelData(acc);
         mpu.readMagData(mag);
         Temp = mpu.readTempData();
-        pc.printf("Gyr: %d, %d, %d\n\r", gyr[0], gyr[1], gyr[2]); 
-        pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]); 
-        pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
+        acc32_t[0] = (int)acc[0];
+        acc32_t[1] = (int)acc[1];
+        acc32_t[2] = (int)acc[2];
+        ax = (float)acc32_t[0] / 1000.0f;
+        ay = (float)acc32_t[1];
+        az = (float)acc32_t[2];
+        pc.printf("%d,%d,%d\r\n",sizeof(acc[0]),sizeof(acc32_t[0]),sizeof(ax));
+        //pc.printf("Gyr: %d, %d, %d\n\r", gyr[0], gyr[1], gyr[2]); 
+        //pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
+        //pc.printf("Acc: %f, %f, %f\n\r", (float)acc32_t[0], (float)acc32_t[1], (float)acc32_t[2]); 
+        pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
+        //pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
         pc.printf("Temp: %d\n\r",Temp); 
         wait(1);
     }
