@@ -4,6 +4,7 @@ MPU9250からジャイロ・加速度・地磁気を取得してシリアルで�
 CS~ : HIGH
 ADO : LOW
 SDA/SCL 10kΩでpullup
+20191023
 */
 #include "mbed.h"
 #include "MPU9250.h"
@@ -18,7 +19,7 @@ float mag_init[3];
 
 MPU9250 mpu = MPU9250(PB_7, PB_6);
 
-vioid main(){
+int main(){
     wait(1.0); //気持ち
     whoami = mpu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
     pc.printf("I AM 0x%x\n\r", whoami); //0x71で正常
