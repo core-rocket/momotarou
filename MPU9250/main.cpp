@@ -23,12 +23,13 @@ MPU9250 mpu = MPU9250(PB_7, PB_6);
 int main(){
     wait(1.0); //気持ち
     whoami_MPU9250 = mpu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
+    wait(0.1);
     whoami_AK8963 = mpu.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
     pc.printf("MPU9250 IS 0x%x\n\r", whoami_MPU9250); //0x71で正常
     pc.printf("AK8963 IS 0x%x\n\r", whoami_AK8963); //0x48で正常
     
 
-    if (whoami_MPU9250 == 0x71 && whoami_AK8963 == 0x48){  
+    if (whoami_MPU9250 == 0x71 || whoami_AK8963 == 0x48){  
         pc.printf("MPU9250 is detected.\n\r");
         wait(1.0); //気持ち
         mpu.resetMPU9250();
@@ -86,11 +87,11 @@ int main(){
         ay = (float)acc32_t[1];
         az = (float)acc32_t[2];
         pc.printf("%d,%d,%d\r\n",sizeof(acc[0]),sizeof(acc32_t[0]),sizeof(ax));
-        //pc.printf("Gyr: %d, %d, %d\n\r", gyr[0], gyr[1], gyr[2]); 
-        //pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
+        pc.printf("Gyr: %d, %d, %d\n\r", gyr[0], gyr[1], gyr[2]); 
+        pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
         //pc.printf("Acc: %f, %f, %f\n\r", (float)acc32_t[0], (float)acc32_t[1], (float)acc32_t[2]); 
-        pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
-        //pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
+        //pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
+        pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
         pc.printf("Temp: %d\n\r",Temp); 
         wait(1);
     }
