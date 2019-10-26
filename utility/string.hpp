@@ -22,6 +22,13 @@ namespace utility {
 		}
 	}
 
+	template<typename T>
+	auto swap(T &v1, T &v2){
+		T tmp = v1;
+		v1 = v2;
+		v2 = tmp;
+	}
+
 	class string {
 	public:
 		string() : ptr(nullptr), capacity_(0), length_(0) {
@@ -45,6 +52,15 @@ namespace utility {
 			return ptr[pos];
 		}
 
+		auto operator+=(const char c) -> string& {
+			const auto len = length() + 1;
+			reserve(len);
+
+			this->ptr[length()] = c;
+			this->length_ = len;
+			return *this;
+		}
+
 		auto operator+=(const string &str) -> string& {
 			const auto len = this->length() + str.length();
 			reserve(len);
@@ -65,6 +81,16 @@ namespace utility {
 
 			this->ptr = p;
 			this->capacity_ = sz;
+		}
+
+		auto reverse() -> void {
+			if(length() == 0) return;
+			size_t first = 0;
+			size_t last  = length();
+
+			for(;first!=last && first!=--last;++first){
+				swap(this->ptr[first], this->ptr[last]);
+			}
 		}
 
 		auto length() const -> const size_t {
@@ -93,8 +119,14 @@ namespace utility {
 		return bin->sign;
 	}
 
-	string to_string(float val){
-		string str;
+	template<typename Float>
+	void float_to_string(Float val, string &str){
+		size_t precision = 5;
+		Float rounder = 0.5;
+		for(size_t i=0;i<precision;i++){
+			rounder /= 10.0;
+		}
+
 		str.reserve(10);
 
 		if(signbit(val)){
@@ -102,35 +134,47 @@ namespace utility {
 			str += "-";
 		}
 
-		return str;
-	}
-
-	void print_float(float val){
-		if(signbit(val)){
-			val = -1.0 * val;
-			putchar('-');
-		}
+		val += rounder;
 
 		long int_part = val;
-		//printf("int part = %d\n", int_part);
+		val -= int_part;
 
-		val -= int_part;	// 小数部
+		if(int_part == 0) str += '0';
+		else{
+			string str_int;
+			while(int_part){
+				str_int += '0' + int_part % 10;
+				int_part /= 10;
+			}
+			str_int.reverse();
+			str += str_int;
+		}
+
 		if(val == 0.0) return;
+		str += ".";
 
-		//printf("val = %f\n", val);
-
-		putchar('.');
 		val *= 10.0;
-		for(int i=0;i<5;i++){
+		while(precision--){
 			char c = val;
 			val -= c;
 			val *= 10.0;
 
-			putchar('0' + c);
-			//printf("%c %f\n", '0' + c, val);
+			str += '0' + c;
 		}
 
-		putchar('\n');
+		return;
+	}
+
+	auto to_string(float val) -> string {
+		string str;
+		float_to_string(val, str);
+		return str;
+	}
+
+	auto to_string(double val) -> string {
+		string str;
+		float_to_string(val, str);
+		return str;
 	}
 }
 
