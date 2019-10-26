@@ -24,15 +24,15 @@ namespace utility {
 
 	class string {
 	public:
-		string() : ptr(nullptr), bufsize(0), length_(0) {}
-		string(const char *str) : ptr(nullptr), bufsize(0), length_(0) {
+		string() : ptr(nullptr), capacity_(0), length_(0) {
+			reserve(5);
+			this->ptr[0] = '\0';
+		}
+		string(const char *str) : ptr(nullptr), capacity_(0), length_(0) {
 			const auto len= strlen(str);
-			const auto sz = len + 1;
-			auto p = new char[sz];
-			memcpy(p, str, sz);
+			reserve(len);
 
-			this->ptr = p;
-			this->bufsize = sz;
+			memcpy(this->ptr, str, len+1);
 			this->length_ = len;
 		}
 		~string(){
@@ -41,33 +41,44 @@ namespace utility {
 		}
 
 		auto operator[](const size_t pos) -> char& {
-			// TODO: pos check
+			if(pos >= length()) return ptr[length()];
 			return ptr[pos];
 		}
 
 		auto operator+=(const string &str) -> string& {
 			const auto len = this->length() + str.length();
-			const auto sz  = len + 1;
-			auto p = new char[sz];
-			memcpy(p, this->ptr, this->length());
-			memcpy(p+this->length(), str.ptr, str.length()+1);
+			reserve(len);
+			memcpy(this->ptr+this->length(), str.ptr, str.length()+1);
 
-			delete[] this->ptr;
-			this->ptr = p;
-			this->bufsize = sz;
 			this->length_ = len;
 			return *this;
 		}
 
+		auto reserve(const size_t sz) -> void {
+			if(capacity() >= sz) return;
+
+			auto p = new char[sz+1];
+			if(this->ptr != nullptr){
+				memcpy(p, this->ptr, length()+1);
+				delete[] this->ptr;
+			}
+
+			this->ptr = p;
+			this->capacity_ = sz;
+		}
+
 		auto length() const -> const size_t {
 			return this->length_;
+		}
+		auto capacity() const -> const size_t {
+			return this->capacity_;
 		}
 		auto c_str() const -> const char* {
 			return static_cast<const char*>(ptr);
 		}
 	protected:
 		char *ptr;
-		size_t bufsize;
+		size_t capacity_;
 		size_t length_;
 	};
 
@@ -80,6 +91,18 @@ namespace utility {
 	inline auto signbit(const float &val) -> bool {
 		auto *bin = reinterpret_cast<const float_bin_t*>(&val);
 		return bin->sign;
+	}
+
+	string to_string(float val){
+		string str;
+		str.reserve(10);
+
+		if(signbit(val)){
+			val = -1.0 * val;
+			str += "-";
+		}
+
+		return str;
 	}
 
 	void print_float(float val){

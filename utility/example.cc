@@ -18,4 +18,6 @@ int main(int argc, char **argv){
 
 	s += ", friend";
 	print_str(s);
+
+	print_str(to_string(1.234f));
 }
