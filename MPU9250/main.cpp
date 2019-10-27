@@ -52,30 +52,30 @@ int main(){
     }
     
     while(1) {        
-        /*
+        
         mpu.readGyroData(gyr);
         
-        gx = gyr[0] * 250.0 / 32768.0;
-        gy = gyr[1] * 250.0 / 32768.0;
-        gz = gyr[2] * 250.0 / 32768.0;
+        gx = gyr[0] *  0.03048;
+        gy = gyr[1] *  0.03048;
+        gz = gyr[2] *  0.03048;
 
         mpu.readAccelData(acc);
-        ax = acc[0] * 2.0 / 32768.0;
-        ay = acc[1] * 2.0 / 32768.0;
-        az = acc[2] * 2.0 / 32768.0;
+        ax = (int)acc[0] / 2049.81;
+        ay = (int)acc[1] / 2049.81;
+        az = (int)acc[2] / 2049.81;
         
         mpu.readMagData(mag);
-        mx = mag[0] * 10.0 * 4219.0 / 8190.0;
-        my = mag[1] * 10.0 * 4219.0 / 8190.0;
-        mz = mag[2] * 10.0 * 4219.0 / 8190.0;
+        mx = mag[0] * 0.15;
+        my = mag[1] * 0.15;
+        mz = mag[2] * 0.15;
 
         Temp = mpu.readTempData();
         
-        pc.printf("Gyr: %d, %d, %d\n\r", gx, gy, gz); 
-        pc.printf("Acc: %d, %d, %d\n\r", ax, ay, az); 
-        pc.printf("Mag: %d, %d, %d\n\r", mx, my, mz);
-        */
-
+        //pc.printf("Gyr: %f, %f, %f\n\r", gx, gy, gz); 
+        //pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
+        pc.printf("%f,%f,%f\n\r", mx, my, mz);
+        
+        /*
         mpu.readGyroData(gyr);
         mpu.readAccelData(acc);
         mpu.readMagData(mag);
@@ -93,6 +93,7 @@ int main(){
         //pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
         pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
         pc.printf("Temp: %d\n\r",Temp); 
-        wait(1);
+        */
+        //wait(0.5);
     }
 }
