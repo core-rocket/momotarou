@@ -1,0 +1,22 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install Depend Packages
+      run: |
+        apt install python2.7 python-pip gcc-arm-none-eabi mercurial git
+    - name: Install Mbed CLI
+      run: |
+        pip install mbed-cli
+    - name: Install External Libraries
+      run: |
+        mbed deploy
+    - name: build
+      run: |
+        mbed compile
