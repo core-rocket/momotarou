@@ -13,7 +13,7 @@ jobs:
         sudo apt install python2.7 python-pip gcc-arm-none-eabi mercurial git
     - name: Install Mbed CLI
       run: |
-        pip install mbed-cli
+        sudo pip install mbed-cli
     - name: Install External Libraries
       run: |
         mbed deploy
