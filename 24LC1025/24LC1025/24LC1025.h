@@ -13,6 +13,7 @@ class LC1025{
     ~LC1025();
 
     void writeByte(uint8_t address, uint16_t subAddress, uint8_t data);
+    void PageWrite(uint8_t address, uint16_t subAddress, char *data, int num);
     char RandomRead(uint8_t address, uint16_t subAddress);
     char SequentialRead(uint8_t address, uint16_t subAddress);
     void readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * dest);

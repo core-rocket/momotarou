@@ -30,6 +30,17 @@ void LC1025::writeByte(uint8_t address, uint16_t subAddress, uint8_t data)
    i2c_->write(address, data_write, 3);
 }
 
+void LC1025::PageWrite(uint8_t address, uint16_t subAddress, char *data, int num)
+{
+   char data_write[num+2];
+   data_write[0] = (subAddress >> 8) & 0xff ;
+   data_write[1] = (subAddress) & 0xff ;
+   for(int i = 0; i < num; i++){
+        data_write[i+2] = data[i];
+   }
+   i2c_->write(address, data_write, num+2);
+}
+
 char LC1025::RandomRead(uint8_t address, uint16_t subAddress)
 {
     char data[1]; // `data` will store the register data     
