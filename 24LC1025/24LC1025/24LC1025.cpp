@@ -1,7 +1,9 @@
 #include "24LC1025.h"
 
-#define Kp 2.0f * 5.0f // these are the free parameters in the Mahony filter and fusion scheme, Kp for proportional feedback, Ki for integral
-#define Ki 0.0f
+/*
+ref.http://akizukidenshi.com/download/I-02525_24lc1025.pdf
+Created by sassy,CORE
+*/
 
 //******************************************************************************
 LC1025::LC1025(PinName sda, PinName scl)
