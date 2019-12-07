@@ -19,8 +19,14 @@ jobs:
         sudo pip install -r requirements.txt
         mbed config --global GCC_ARM_PATH "/usr/bin/"
     - name: ADXL375
-      run: |
-        cd ADXL375
-        mbed deploy
-        mbed compile
-        cd ..
+      run: (cd ADXL375;mbed deploy;#mbed compile)
+    - name: BME280
+      run: (cd BME280;mbed deploy;mbed compile)
+    - name: GYSFDMAXB
+      run: (cd GYSFDMAXB;mbed deploy;mbed compile)
+    - name: HX711
+      run: (cd HX711;mbed deploy;mbed compile)
+    - name: MPU9250
+      run: (cd MPU9250;mbed deploy;mbed compile)
+    - name: SDCard
+      run: (cd SDCard;mbed deploy;mbed compile)
