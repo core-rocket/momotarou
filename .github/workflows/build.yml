@@ -16,9 +16,9 @@ jobs:
       run: |
         sudo pip install mbed-cli
         mbed config --global GCC_ARM_PATH "/usr/bin/"
-    - name: Install External Libraries
+    - name: ADXL375
       run: |
+        cd ADXL375
         mbed deploy
-    - name: build
-      run: |
         mbed compile
+        cd ..
