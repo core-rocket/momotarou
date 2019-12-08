@@ -5,7 +5,7 @@ onFailure(){
 }
 trap onFailure ERR
 
-./build.sh 24LC1025
+#./build.sh 24LC1025
 ./build.sh ADXL375
 ./build.sh BME280
 ./build.sh GYSFDMAXB
