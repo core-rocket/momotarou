@@ -18,8 +18,5 @@ jobs:
         sudo pip install jsonschema paramiko pyelftools
         sudo pip install -r requirements.txt
         mbed config --global GCC_ARM_PATH "/usr/bin/"
-
-  build:
-    steps:
     - name: Build
       run: ./ci.sh
