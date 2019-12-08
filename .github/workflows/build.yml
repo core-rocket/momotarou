@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install Depend Packages
       run: |
-        sudo apt install python2.7 python-pip gcc-arm-none-eabi mercurial git
+        sudo apt install python2.7 python-pip gcc-arm-none-eabi mercurial git parallel
         which arm-none-eabi-gcc
     - name: Install and Config Mbed CLI
       run: |
