@@ -18,6 +18,8 @@ jobs:
         sudo pip install jsonschema paramiko pyelftools
         sudo pip install -r requirements.txt
         mbed config --global GCC_ARM_PATH "/usr/bin/"
+    - name: 24LC1025
+      run: (cd 24LC1025;mbed deploy;mbed compile)
     - name: ADXL375
       run: (cd ADXL375;mbed deploy;mbed compile)
     - name: BME280
