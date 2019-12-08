@@ -3,7 +3,7 @@ name: build
 on: [push]
 
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,17 +18,41 @@ jobs:
         sudo pip install jsonschema paramiko pyelftools
         sudo pip install -r requirements.txt
         mbed config --global GCC_ARM_PATH "/usr/bin/"
+
+  24LC1025:
+    needs: prepare
+    steps:
     - name: 24LC1025
       run: (cd 24LC1025;mbed deploy;mbed compile)
+
+  ADXL375:
+    needs: prepare
+    steps:
     - name: ADXL375
       run: (cd ADXL375;mbed deploy;mbed compile)
+
+  BME280:
+    needs: prepare
+    steps:
     - name: BME280
       run: (cd BME280;mbed deploy;mbed compile)
+
+  GYSFDMAXB:
+    needs: prepare
     - name: GYSFDMAXB
       run: (cd GYSFDMAXB;mbed deploy;mbed compile)
+
+  HX711:
+    needs: prepare
     - name: HX711
       run: (cd HX711;mbed deploy;mbed compile)
+
+  MPU9250:
+    needs: prepare
     - name: MPU9250
       run: (cd MPU9250;mbed deploy;mbed compile)
+
+  SDCard:
+    needs: prepare
     - name: SDCard
       run: (cd SDCard;mbed deploy;mbed compile)
