@@ -19,44 +19,7 @@ jobs:
         sudo pip install -r requirements.txt
         mbed config --global GCC_ARM_PATH "/usr/bin/"
 
-  24LC1025:
-    needs: prepare
+  build:
     steps:
-    - name: 24LC1025
-      run: (cd 24LC1025;mbed deploy;mbed compile)
-
-  ADXL375:
-    needs: prepare
-    steps:
-    - name: ADXL375
-      run: (cd ADXL375;mbed deploy;mbed compile)
-
-  BME280:
-    needs: prepare
-    steps:
-    - name: BME280
-      run: (cd BME280;mbed deploy;mbed compile)
-
-  GYSFDMAXB:
-    needs: prepare
-    steps:
-    - name: GYSFDMAXB
-      run: (cd GYSFDMAXB;mbed deploy;mbed compile)
-
-  HX711:
-    needs: prepare
-    steps:
-    - name: HX711
-      run: (cd HX711;mbed deploy;mbed compile)
-
-  MPU9250:
-    needs: prepare
-    steps:
-    - name: MPU9250
-      run: (cd MPU9250;mbed deploy;mbed compile)
-
-  SDCard:
-    needs: prepare
-    steps:
-    - name: SDCard
-      run: (cd SDCard;mbed deploy;mbed compile)
+    - name: Build
+      run: ./ci.sh
