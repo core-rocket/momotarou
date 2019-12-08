@@ -39,20 +39,24 @@ jobs:
 
   GYSFDMAXB:
     needs: prepare
+    steps:
     - name: GYSFDMAXB
       run: (cd GYSFDMAXB;mbed deploy;mbed compile)
 
   HX711:
     needs: prepare
+    steps:
     - name: HX711
       run: (cd HX711;mbed deploy;mbed compile)
 
   MPU9250:
     needs: prepare
+    steps:
     - name: MPU9250
       run: (cd MPU9250;mbed deploy;mbed compile)
 
   SDCard:
     needs: prepare
+    steps:
     - name: SDCard
       run: (cd SDCard;mbed deploy;mbed compile)
