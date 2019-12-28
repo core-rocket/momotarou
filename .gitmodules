@@ -1,0 +1,3 @@
+[submodule "TWE-Lite/TWE-Lite"]
+	path = TWE-Lite/TWE-Lite
+	url = https://github.com/sk2sat/TWE-Lite.hpp
