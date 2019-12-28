@@ -29,6 +29,5 @@ jobs:
         job_name: "*Build test*"
         icon_emoji: "octcat"
         channel: "#ci"
-        mention: "here"
         mention_if: "failure"
         url: ${{ secrets.SLACK_WEBHOOK }}
