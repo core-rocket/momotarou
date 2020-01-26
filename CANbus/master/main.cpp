@@ -7,11 +7,11 @@ MCP2551まわりは以下参照(終端Rは410ohmを使った，そこにあっ�
 https://raw.githubusercontent.com/rummanwaqar/teensy_can/master/schematic.png
 */
 #include "mbed.h"
-
 Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
 CAN can(PA_11, PA_12); //pin21,22 rd,td
-DigitalOut myled(PB_1); //pin15
-Ticker ticker;
+
+char senddata_1[5];
+char senddata_3[13];
 
 union Float2Byte{
     float _float;
@@ -19,44 +19,45 @@ union Float2Byte{
 };
 typedef union Float2Byte Float2Byte;
 
-void send(){
-    pc.printf("Master send()\n\r");
-    
-    /*ID: 0x01*/
+void send_1(float value, char moji){
+    senddata_1[4] = moji;
     Float2Byte sendFloat;
-    sendFloat._float = 89.123; //ここに送りたい値を入れる．
-    
-    char serialData[4];
+    sendFloat._float = value;
     for(int i=0;i<4;++i){
-        serialData[i] = sendFloat._byte[i];
-        pc.printf("send_char: %d\n\r", serialData[i]);
+        senddata_1[i] = sendFloat._byte[i];
     }
-    pc.printf("sendFloat: %f\n\r", sendFloat._float);
-    if(can.write(CANMessage(0x01, serialData, 4))){
+    if(can.write(CANMessage(0x02, senddata_1, 5))){ //ID:0x02
         pc.printf("Send.\n\r");
     } 
-    
-    /*ID: 0x02*/
-    Float2Byte sendFloat2;
-    sendFloat2._float = 30.203; //ここに送りたい値を入れる．
-    char serialData2[4];
+}
+
+void send_3(float value_1,float value_2, float value_3, char moji){
+    pc.printf("send_pre.");
+    senddata_3[12] = moji;
+    Float2Byte sendFloat;
+    sendFloat._float = value_1;
     for(int i=0;i<4;++i){
-        serialData2[i] = sendFloat2._byte[i];
-        pc.printf("send_char2: %d\n\r", serialData2[i]);
+        senddata_3[i] = sendFloat._byte[i];
     }
-    pc.printf("sendFloat2: %f\n\r", sendFloat2._float);
-    if(can.write(CANMessage(0x02, serialData2, 4))){
-        pc.printf("Send2.\n\r");
+    sendFloat._float = value_2;
+    for(int i=4;i<8;++i){
+        senddata_3[i] = sendFloat._byte[i];
+    }
+    sendFloat._float = value_3;
+    for(int i=8;i<12;++i){
+        senddata_3[i] = sendFloat._byte[i];
+    }
+    if(can.write(CANMessage(0x05, senddata_3, 13))){ //ID:0x05
+        pc.printf("Send.\n\r");
     } 
-    
-    myled = !myled;
 }
 
 int main(){
-    pc.printf("Master_start.\n\r");
-    ticker.attach(&send, 1);
+    pc.printf("start.\n\r");
     while(1){
-        pc.printf("Master loop()\n\r");
-        wait(1.0);
+        wait(0.1);
+        send_1(1.0, 'a');
+        wait(0.1);
+        send_3(2.0, 3.0, 4.0, 'b');
     }
 }

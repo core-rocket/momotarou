@@ -1,17 +1,16 @@
 /*
 CAN通信slave側
-2種類のIDから受信する．
 rd - RXD
 td - TXD
-MCP2551まわりは以下参照(終端Rは410ohmを使った，そこにあったので)
-https://raw.githubusercontent.com/rummanwaqar/teensy_can/master/schematic.png
 */
 #include "mbed.h"
 
-Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
-CAN can(PA_11, PA_12); //pin21,22 rd,td
-DigitalOut myled(PB_1); //pin15
+//Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
+Serial pc(PA_2, PA_3, 9600); //pin8,9 TX,RX
 
+CAN can(PA_11, PA_12); //pin21,22 rd,td
+
+float _x, _y, _z;
 CANMessage msg;
 
 union Float2Byte{
@@ -22,36 +21,53 @@ typedef union Float2Byte Float2Byte;
 
 void receive(){
     Float2Byte getFloat;
-    
     if(can.read(msg)){
-        /*ID: 0x01*/
         if(msg.id == 0x01){
-            pc.printf("ID: 0x01\n\r");
             for(int i=0;i<4;++i){
                 getFloat._byte[i] = msg.data[i];
-                pc.printf("get_char: %d\n\r", getFloat._byte[i]);
-            }
-            pc.printf("getFloat: %f\n\r", getFloat._float);
-            myled = !myled;
+            }            
+            pc.printf("ID:%d,%c,%f\n\r", msg.id, msg.data[4], getFloat._float);
         }
-        /*ID: 0x02*/
         if(msg.id == 0x02){
-            pc.printf("ID: 0x02\n\r");
             for(int i=0;i<4;++i){
                 getFloat._byte[i] = msg.data[i];
-                pc.printf("get_char: %d\n\r", getFloat._byte[i]);
+            }            
+            pc.printf("ID:%d,%c,%f\n\r", msg.id, msg.data[4], getFloat._float);
+        }
+        if(msg.id == 0x03){
+            for(int i=0;i<4;++i){
+                getFloat._byte[i] = msg.data[i];
+            }            
+            pc.printf("ID:%d,%c,%f\n\r", msg.id, msg.data[4], getFloat._float);
+        }
+        if(msg.id == 0x04){
+            for(int i=0;i<4;++i){
+                getFloat._byte[i] = msg.data[i];
+            }            
+            pc.printf("ID:%d,%c,%f\n\r", msg.id, msg.data[4], getFloat._float);
+        }
+        if(msg.id == 0x05){
+            for(int i=0;i<4;++i){
+                getFloat._byte[i] = msg.data[i];
             }
-            pc.printf("getFloat: %f\n\r", getFloat._float);
-            myled = !myled;
+            _x = getFloat._float;
+            for(int i=4;i<8;++i){
+                getFloat._byte[i] = msg.data[i];
+            }
+            _y = getFloat._float;
+            for(int i=8;i<12;++i){
+                getFloat._byte[i] = msg.data[i];
+            }
+            _z = getFloat._float;
+            pc.printf("ID:%d,%c,%f,%f,%f\n\r", msg.id, msg.data[12], _x, _y, _z);
         }
     }
 }
 
 int main(){
-    pc.printf("Slave_Start.\n\r");
+    pc.printf("Start.\n\r");
     can.attach(receive, CAN::RxIrq);
     while(1){
-        pc.printf("Slave loop()\n\r");
         wait(0.2);
     }
 }
