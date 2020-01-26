@@ -8,56 +8,74 @@ SDA/SCL 10kΩでpullup
 */
 #include "mbed.h"
 #include "MPU9250.h"
-
-DigitalOut myled(PB_1);
-Serial pc(PA_9, PA_10, 9600);
+Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
+MPU9250 mpu = MPU9250(PB_7, PB_6); //pin30,29 SDA,SCL
+CAN can(PA_11, PA_12); //pin21,22 rd,td
 
 uint8_t whoami_MPU9250,whoami_AK8963;
-int16_t gyr[3], acc[3], mag[3],Temp;
+int16_t gyr[3], acc[3], mag[3], Temp;
 float gx, gy, gz, ax, ay, az, mx, my, mz;
 float mag_init[3];
 int acc32_t[3];
+char senddata[13];
 
-MPU9250 mpu = MPU9250(PB_7, PB_6);
+union Float2Byte{
+    float _float;
+    char _byte[4];
+};
+typedef union Float2Byte Float2Byte;
+
+void send(float value_1,float value_2, float value_3, char moji){
+    pc.printf("send_pre.");
+    senddata[12] = moji;
+    Float2Byte sendFloat;
+    sendFloat._float = value_1;
+    for(int i=0;i<4;++i){
+        senddata[i] = sendFloat._byte[i];
+    }
+    sendFloat._float = value_2;
+    for(int i=4;i<8;++i){
+        senddata[i] = sendFloat._byte[i];
+    }
+    sendFloat._float = value_3;
+    for(int i=8;i<12;++i){
+        senddata[i] = sendFloat._byte[i];
+    }
+    if(can.write(CANMessage(0x05, senddata, 13))){ //ID:0x05
+        pc.printf("Send.\n\r");
+    } 
+}
 
 int main(){
-    wait(1.0); //気持ち
+    wait(0.1); //気持ち
     whoami_MPU9250 = mpu.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
-    wait(0.1);
     whoami_AK8963 = mpu.readByte(AK8963_ADDRESS, WHO_AM_I_AK8963);
     pc.printf("MPU9250 IS 0x%x\n\r", whoami_MPU9250); //0x71で正常
     pc.printf("AK8963 IS 0x%x\n\r", whoami_AK8963); //0x48で正常
     
-
     if (whoami_MPU9250 == 0x71 || whoami_AK8963 == 0x48){  
         pc.printf("MPU9250 is detected.\n\r");
-        wait(1.0); //気持ち
         mpu.resetMPU9250();
         //MPU9250とAK8963のCalibrationをここら辺でする
         mpu.initMPU9250(); 
-        wait(1.0); //気持ち
         mpu.initAK8963(mag_init);
-        wait(1.0);
-        myled = 1;
         pc.printf("Start.\n\r");
         mpu.getGres();
         mpu.getAres();
         mpu.getMres();
-        wait(1.0); //気持ち
-   }
-   else{
+    }
+    else{
         pc.printf("Could not detect MPU9250.\n\r");
         pc.printf("whoami_MPU9250 = 0x%x\n\rwhoami_AK8963 = 0x%x\r\n",whoami_MPU9250,whoami_AK8963);
-        while(1);
+        while(1){};
     }
     
-    while(1) {        
-        
+    while(1){
+        pc.printf("Read.");
         mpu.readGyroData(gyr);
-        
-        gx = gyr[0] *  0.03048;
-        gy = gyr[1] *  0.03048;
-        gz = gyr[2] *  0.03048;
+        gx = gyr[0] * 0.03048;
+        gy = gyr[1] * 0.03048;
+        gz = gyr[2] * 0.03048;
 
         mpu.readAccelData(acc);
         ax = (int)acc[0] / 2049.81;
@@ -71,29 +89,13 @@ int main(){
 
         Temp = mpu.readTempData();
         
-        //pc.printf("Gyr: %f, %f, %f\n\r", gx, gy, gz); 
-        //pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
-        pc.printf("%f,%f,%f\n\r", mx, my, mz);
+        pc.printf("Gyr: %f, %f, %f\n\r", gx, gy, gz); 
+        pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
+        pc.printf("Mag: %f, %f, %f\n\r", mx, my, mz);
         
-        /*
-        mpu.readGyroData(gyr);
-        mpu.readAccelData(acc);
-        mpu.readMagData(mag);
-        Temp = mpu.readTempData();
-        acc32_t[0] = (int)acc[0];
-        acc32_t[1] = (int)acc[1];
-        acc32_t[2] = (int)acc[2];
-        ax = (float)acc32_t[0] / 1000.0f;
-        ay = (float)acc32_t[1];
-        az = (float)acc32_t[2];
-        pc.printf("%d,%d,%d\r\n",sizeof(acc[0]),sizeof(acc32_t[0]),sizeof(ax));
-        pc.printf("Gyr: %d, %d, %d\n\r", gyr[0], gyr[1], gyr[2]); 
-        pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
-        //pc.printf("Acc: %f, %f, %f\n\r", (float)acc32_t[0], (float)acc32_t[1], (float)acc32_t[2]); 
-        //pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
-        pc.printf("Mag: %d, %d, %d\n\r", mag[0], mag[1], mag[2]);
-        pc.printf("Temp: %d\n\r",Temp); 
-        */
-        //wait(0.5);
+        send(gx, gy, gz, 'g');
+        send(ax, ay, az, 'c');
+        send(mx, my, mz, 'm');
+        wait(0.1);
     }
 }
