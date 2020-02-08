@@ -13,7 +13,7 @@ int main(){
 	//es920lr.putc(length);
 	//es920lr.putc('A');
 	//wait(1.8);
-	wait(2.0);
+	wait(5.0);
 
 	while(true){
 		for(uint8_t len=1;len<=50;len++){
