@@ -1,49 +1,38 @@
 /*
-MPU9250からジャイロ・加速度・地磁気を取得してシリアルで表示する．
+MPU9250からジャイロ・加速度・地磁気を取得してCAN送信・シリアル送信．
 <MPU9250ピン設定>
 CS~ : HIGH
 ADO : LOW
 SDA/SCL 10kΩでpullup
-20191023
 */
 #include "mbed.h"
 #include "MPU9250.h"
-Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
+Serial pc(PA_9, PA_10, 115200); //pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); //pin30,29 SDA,SCL
-CAN can(PA_11, PA_12); //pin21,22 rd,td
+CAN can(PA_11, PA_12, 100000); //pin21,22 rd,td
 
 uint8_t whoami_MPU9250,whoami_AK8963;
 int16_t gyr[3], acc[3], mag[3], Temp;
-float gx, gy, gz, ax, ay, az, mx, my, mz;
+float g_x, g_y, g_z, a_x, a_y, a_z, m_x, m_y, m_z;
 float mag_init[3];
 int acc32_t[3];
-char senddata[13];
+char senddata[5];
 
 union Float2Byte{
     float _float;
     char _byte[4];
-};
-typedef union Float2Byte Float2Byte;
+}f2b;
 
-void send(float value_1,float value_2, float value_3, char moji){
-    pc.printf("send_pre.");
-    senddata[12] = moji;
-    Float2Byte sendFloat;
-    sendFloat._float = value_1;
-    for(int i=0;i<4;++i){
-        senddata[i] = sendFloat._byte[i];
+void send(int id, float value, char moji){
+    senddata[0] = moji;
+    f2b._float = value;
+    for(int i=1;i<5;++i){
+        senddata[i] = f2b._byte[i];
     }
-    sendFloat._float = value_2;
-    for(int i=4;i<8;++i){
-        senddata[i] = sendFloat._byte[i];
+    CANMessage msg(id, senddata, 5);
+    if(can.write(msg)){
+        pc.printf("%d,%c\n\r", id, moji);
     }
-    sendFloat._float = value_3;
-    for(int i=8;i<12;++i){
-        senddata[i] = sendFloat._byte[i];
-    }
-    if(can.write(CANMessage(0x05, senddata, 13))){ //ID:0x05
-        pc.printf("Send.\n\r");
-    } 
 }
 
 int main(){
@@ -70,32 +59,40 @@ int main(){
         while(1){};
     }
     
-    while(1){
-        pc.printf("Read.");
-        mpu.readGyroData(gyr);
-        gx = gyr[0] * 0.03048;
-        gy = gyr[1] * 0.03048;
-        gz = gyr[2] * 0.03048;
-
+    while(1){        
         mpu.readAccelData(acc);
-        ax = (int)acc[0] / 2049.81;
-        ay = (int)acc[1] / 2049.81;
-        az = (int)acc[2] / 2049.81;
+        a_x = (int)acc[0] / 2049.81;
+        a_y = (int)acc[1] / 2049.81;
+        a_z = (int)acc[2] / 2049.81;
+        
+        mpu.readGyroData(gyr);
+        g_x = gyr[0] * 0.03048;
+        g_y = gyr[1] * 0.03048;
+        g_z = gyr[2] * 0.03048;
         
         mpu.readMagData(mag);
-        mx = mag[0] * 0.15;
-        my = mag[1] * 0.15;
-        mz = mag[2] * 0.15;
+        m_x = mag[0] * 0.15;
+        m_y = mag[1] * 0.15;
+        m_z = mag[2] * 0.15;
 
-        Temp = mpu.readTempData();
+        //Temp = mpu.readTempData();
         
-        pc.printf("Gyr: %f, %f, %f\n\r", gx, gy, gz); 
-        pc.printf("Acc: %f, %f, %f\n\r", ax, ay, az); 
-        pc.printf("Mag: %f, %f, %f\n\r", mx, my, mz);
+        pc.printf("Acc: %f, %f, %f\n\r", a_x, a_y, a_z);
+        pc.printf("Gyr: %f, %f, %f\n\r", g_x, g_y, g_z); 
+        pc.printf("Mag: %f, %f, %f\n\r", m_x, m_y, m_z);
         
-        send(gx, gy, gz, 'g');
-        send(ax, ay, az, 'c');
-        send(mx, my, mz, 'm');
+        send(0x04, a_x, 'x');
+        send(0x04, a_y, 'y');
+        send(0x04, a_z, 'z');
+
+        send(0x07, g_x, 'x');
+        send(0x07, g_y, 'y');
+        send(0x07, g_z, 'z');
+        
+        send(0xB, m_x, 'x');
+        send(0xB, m_y, 'y');
+        send(0xB, m_z, 'z');
+
         wait(0.1);
     }
 }
