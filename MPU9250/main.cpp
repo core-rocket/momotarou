@@ -61,9 +61,9 @@ int main(){
     
     while(1){        
         mpu.readAccelData(acc);
-        a_x = (int)acc[0] / 2049.81;
-        a_y = (int)acc[1] / 2049.81;
-        a_z = (int)acc[2] / 2049.81;
+        a_x = acc[0] / 2049.81;
+        a_y = acc[1] / 2049.81;
+        a_z = acc[2] / 2049.81;
         
         mpu.readGyroData(gyr);
         g_x = gyr[0] * 0.03048;
