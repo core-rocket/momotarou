@@ -1,7 +1,7 @@
 #ifndef COMMON_HPP_
 #define COMMON_HPP_
 
-enum class Phase {
+enum class Phase : uint8_t {
 	standby,
 	flight,
 	burning,

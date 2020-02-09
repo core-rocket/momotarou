@@ -7,7 +7,7 @@ CAN can(PA_11, PA_12);
 
 namespace global {
 	Phase phase;
-	CANMessage can_msg;
+	CANMessage recv_msg;
 }
 
 void can_recv();
@@ -16,10 +16,17 @@ int main(){
 	global::phase = Phase::standby;
     pc.printf("start opener.\n\r");
 
+	CANMessage msg;
+
 	can.attach(can_recv, CAN::RxIrq);
 
 	while(true){
 		// フェーズ送信
+		msg.id = static_cast<unsigned int>(MsgID::phase);
+		msg.data[0] = static_cast<uint8_t>(global::phase);
+		msg.len = 1;
+		if(!can.write(msg))
+			pc.printf("error: cannot send phase\r\n");
 
 		switch(global::phase){
 		case Phase::standby:
@@ -43,10 +50,10 @@ int main(){
 void can_recv(){
 	using namespace utility::can;
 
-	if(can.read(global::can_msg) == 0)
+	if(can.read(global::recv_msg) == 0)
 		return;
 
-	const auto &msg = global::can_msg;
+	const auto &msg = global::recv_msg;
 	switch(static_cast<MsgID>(msg.id)){
 	case MsgID::command:
 		if(msg.len != 1){
