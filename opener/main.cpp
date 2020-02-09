@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include "../common.h"
+#include "../utility.hpp"
 
 Serial pc(PA_2, PA_3, 115200); //pin8,9 TX,RX
 CAN can(PA_11, PA_12);
@@ -40,21 +41,40 @@ int main(){
 }
 
 void can_recv(){
+	using namespace utility::can;
+
 	if(can.read(global::can_msg) == 0)
 		return;
 
 	const auto &msg = global::can_msg;
-	switch(msg.id){
+	switch(static_cast<MsgID>(msg.id)){
 	case MsgID::command:
-		// flight mode on?
+		if(msg.len != 1){
+			pc.printf("error: unknown length command\r\n");
+			return;
+		}
+		// とりあえず0x01をフライトモードONとする
+		// 後で必ずちゃんと決めること！！！！！！！
+		switch(msg.data[0]){
+		case 0x01: // flight mode ON
+			pc.printf("FLIGHT MODE ON!!!!!!!\r\n");
+			global::phase = Phase::flight;
+			break;
+		default:
+			pc.printf("error: unknown command(%d)\r\n", (int)msg.data[0]);
+			break;
+		}
 		break;
-	case MsgId::error:
+	case MsgID::error:
 		break;
 	case MsgID::acc:
 		// push to FIFO
 		break;
 	case MsgID::air_press:
 		// push to FIFO
+		{
+			const auto apress = get_data<float>(msg);
+		}
 		break;
 	default:
 		break;
