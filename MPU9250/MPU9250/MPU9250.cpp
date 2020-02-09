@@ -172,6 +172,7 @@ void MPU9250::initAK8963(float * destination)
   // set Mscale bit 4 to 1 (0) to enable 16 (14) bit resolution in CNTL register,
   // and enable continuous mode data acquisition Mmode (bits [3:0]), 0010 for 8 Hz and 0110 for 100 Hz sample rates
   writeByte(AK8963_ADDRESS, AK8963_CNTL, Mscale << 4 | Mmode); // Set magnetometer data resolution and sample ODR
+  //writeByte(AK8963_ADDRESS, AK8963_CNTL, 0x16);//0x12 is 16bit and 8 Hz , 0x16 is 16bit and 100Hz cycle. Edit by Sashida 2019/10/23
   wait(0.01);
 }
 
@@ -206,7 +207,7 @@ void MPU9250::initMPU9250()
   c =  readByte(MPU9250_ADDRESS, ACCEL_CONFIG);
   writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c & ~0xE0); // Clear self-test bits [7:5] 
   writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c & ~0x18); // Clear AFS bits [4:3]
-  writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c | Ascale << 3); // Set full scale range for the accelerometer 
+  writeByte(MPU9250_ADDRESS, ACCEL_CONFIG, c | Ascale << 3); // Set full scale range for the accelerometer
 
  // Set accelerometer sample rate configuration
  // It is possible to get a 4 kHz sample rate from the accelerometer by choosing 1 for

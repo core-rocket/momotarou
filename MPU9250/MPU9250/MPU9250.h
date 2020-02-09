@@ -213,10 +213,10 @@ class MPU9250 {
          float gyroBias[3],accelBias[3]; // Bias corrections for gyro and accelerometer
          float magCalibration[3], magbias[3];  // Factory mag calibration and mag bias
          
-         uint8_t Ascale;               // AFS_2G, AFS_4G, AFS_8G, AFS_16G
-         uint8_t Gscale;               // GFS_250DPS, GFS_500DPS, GFS_1000DPS, GFS_2000DPS
-         uint8_t Mscale;               // MFS_14BITS or MFS_16BITS, 14-bit or 16-bit magnetometer resolution
-         uint8_t Mmode;                // Either 8 Hz 0x02) or 100 Hz (0x06) magnetometer data ODR  
+         uint8_t Ascale = AFS_16G;               // AFS_2G, AFS_4G, AFS_8G, AFS_16G
+         uint8_t Gscale = GFS_1000DPS;           // GFS_250DPS, GFS_500DPS, GFS_1000DPS, GFS_2000DPS
+         uint8_t Mscale = MFS_16BITS;     // MFS_14BITS or MFS_16BITS, 14-bit or 16-bit magnetometer resolution
+         uint8_t Mmode = 0x06;            // Either 8 Hz 0x02) or 100 Hz (0x06) magnetometer data ODR  
          float aRes, gRes, mRes;       // scale resolutions per LSB for the sensors
          
          int16_t accelCount[3];  // Stores the 16-bit signed accelerometer sensor output
