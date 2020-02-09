@@ -9,7 +9,7 @@ enum class Phase {
 	parachute,
 };
 
-enum class MsgID : uint8_t {
+enum class MsgID : unsigned int {	// 29bit identifier
 	command		= 0x01,
 	error,
 	air_press,
