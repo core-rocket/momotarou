@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "../phase.h"
+#include "../common.h"
 
 Serial pc(PA_2, PA_3, 115200); //pin8,9 TX,RX
 CAN can(PA_11, PA_12);
