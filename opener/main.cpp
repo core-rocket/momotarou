@@ -39,6 +39,6 @@ void can_recv(){
 	if(can.read(global::can_msg) == 0)
 		return;
 
-	const &msg = global::can_msg;
+	const auto &msg = global::can_msg;
 	// 簡単なparse
 }
