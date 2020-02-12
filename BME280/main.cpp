@@ -43,6 +43,7 @@ int main(){
     
     for(int i;i<N;i++){
         buff_p[i] = bme.getPressure();
+        sum += buff_p[i];
     }
     
     pc.printf("Start.\n\r");
