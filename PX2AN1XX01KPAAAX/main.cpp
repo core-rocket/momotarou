@@ -1,47 +1,49 @@
 #include "mbed.h"
 /*
-Vout 0.5~5.0[V]
-analogIn 0.25~2.5[V]
-coefficient:6.89/(2.5-0.25)=3.062
+Vout 0.5~4.5[V]
+analogIn 0.333~3.0[V]
+coefficient:6.895/(3.0-0.333)=2.5853
 */
 AnalogIn analogin(PA_0); //pin6
-Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
-CAN can(PA_11, PA_12); //pin21,22 rd,td
+Serial pc(PA_9, PA_10, 115200); //pin19,20 TX,RX
+CAN can(PA_11, PA_12, 1000000); //pin21,22 rd,td
 
-float sensorvalue, offset=0.0, chamberpressure, coefficient=2.585;
+float sensorvalue = 0.0;
+float offset = 0.0;
+float chamberpressure = 0.0;
+float coefficient = 2.5853;
 char senddata[5];
 
 union Float2Byte{
     float _float;
     char _byte[4];
-};
-typedef union Float2Byte Float2Byte;
+}f2b;
 
-void send(float value, char moji){
-    senddata[4] = moji;
-    Float2Byte sendFloat;
-    sendFloat._float = value;
-    for(int i=0;i<4;++i){
-        senddata[i] = sendFloat._byte[i];
+void send(int id, float value, char moji){
+    senddata[0] = moji;
+    f2b._float = value;
+    for(int i=1;i<5;++i){
+        senddata[i] = f2b._byte[i];
     }
-    if(can.write(CANMessage(0x03, senddata, 5))){ //ID:0x03
-        pc.printf("Send.\n\r");
-    } 
+    CANMessage msg(id, senddata, 5);
+    if(can.write(msg)){
+        pc.printf("%d,%c\n\r", id, moji);
+    }
 }
 
 int main(){
+    wait(0.1);
     pc.printf("Start.\n\r");
     while(1){
-        wait(0.1);
         sensorvalue = analogin.read()*3.3f - offset;
-        if(sensorvalue > 0.25){
+        if(sensorvalue > 0.33){
             chamberpressure = sensorvalue * coefficient;
         }
         else{
             chamberpressure = 0.0;
         }
         pc.printf("Voltage: %f\n\r", sensorvalue);
-        pc.printf("Pressure: %f\n\r", chamberpressure);
-        send(chamberpressure, 'c');
+        pc.printf("Pressure[MPa]: %f\n\r", chamberpressure);
+        send(0x08, chamberpressure, 'c');
     }
 }
