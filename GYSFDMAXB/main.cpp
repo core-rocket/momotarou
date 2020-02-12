@@ -135,9 +135,9 @@ int main(){
         //ht = ht + 9; // UTC->JST
         
         pc.printf("%f, %f, %f\n\r", lat, lon, time_g);
-        send(0x06, lat, 'a');
-        send(0x06, lon, 'o');
-        send(0x06, time_g, 't');
+        send(0x05, lat, 'a');
+        send(0x05, lon, 'o');
+        send(0x05, time_g, 't');
         //wait(0.1);
     }
 }
