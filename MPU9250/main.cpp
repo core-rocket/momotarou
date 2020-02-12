@@ -25,13 +25,15 @@ char senddata[5];
 float buff_ax[N], buff_ay[N], buff_az[N];
 float buff_gx[N], buff_gy[N], buff_gz[N];
 float buff_mx[N], buff_my[N], buff_mz[N];
-float sum_ax, sum_ay, sum_az;
-float sum_gx, sum_gy, sum_gz;
-float sum_mx, sum_my, sum_mz;
-float ax_new, ay_new, az_new;
-float gx_new, gy_new, gz_new;
-float mx_new, my_new, mz_new;
-float ax, ay, az, gx, gy, gz, mx, my, mz;
+float sum_ax = 0.0, sum_ay = 0.0, sum_az = 0.0;
+float sum_gx = 0.0, sum_gy = 0.0, sum_gz = 0.0;
+float sum_mx = 0.0, sum_my = 0.0, sum_mz = 0.0;
+float ax_new = 0.0, ay_new = 0.0, az_new = 0.0;
+float gx_new = 0.0, gy_new = 0.0, gz_new = 0.0;
+float mx_new = 0.0, my_new = 0.0, mz_new = 0.0;
+float ax = 0.0, ay = 0.0, az = 0.0;
+float gx = 0.0, gy = 0.0, gz = 0.0;
+float mx = 0.0, my = 0.0, mz = 0.0;
 int cnt = 0;
 
 union Float2Byte{
@@ -87,7 +89,7 @@ int main(){
     wait(0.1); // 気持ち
     mpu_init();
     
-    for(int i;i<N;i++){
+    for(int i=0;i<N;i++){
         mpu.readGyroData(gyr);
         mpu.readAccelData(acc);
         mpu.readMagData(mag);
@@ -100,6 +102,15 @@ int main(){
         buff_mx[i] = mag[0] * 0.15;
         buff_my[i] = mag[1] * 0.15;
         buff_mz[i] = mag[2] * 0.15;
+        sum_ax += buff_ax[i];
+        sum_ay += buff_ay[i];
+        sum_az += buff_az[i];
+        sum_gx += buff_gx[i];
+        sum_gy += buff_gy[i];
+        sum_gz += buff_gz[i];
+        sum_mx += buff_mx[i];
+        sum_my += buff_my[i];
+        sum_mz += buff_mz[i];
     }
     
     wait(0.1);
