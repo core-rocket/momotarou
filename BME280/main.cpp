@@ -14,7 +14,7 @@ CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
 #define N 5
 float pressure_ave = 0.0; // 気圧[hPa]
 float pressure_new = 0.0;
-float pre[N];
+float buff_p[N];
 float sum = 0.0;
 int cnt = 0;
 float tem = 0.0; // 温度[C]
@@ -41,15 +41,15 @@ int main(){
     wait(0.1);
     bme.initialize();
     
-    for(int i;i<10;i++){
-        pre[i] = bme.getPressure();
+    for(int i;i<N;i++){
+        buff_p[i] = bme.getPressure();
     }
     
     pc.printf("Start.\n\r");
     while(1){
-        sum = sum - pre[cnt];
+        sum = sum - buff_p[cnt];
         pressure_new = bme.getPressure();
-        pre[cnt] = pressure_new;
+        buff_p[cnt] = pressure_new;
         sum = sum + pressure_new;
         cnt++;
         if(cnt == N) cnt = 0;
