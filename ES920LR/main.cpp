@@ -2,7 +2,7 @@
 
 Serial pc(PA_2, PA_3, 115200); //pin8,9 TX,RX
 Serial es920lr(PA_9, PA_10, 115200);
-CAN can(PA_11, PA_12); //pin21,22 rd,td
+CAN can(PA_11, PA_12, 1000000); //pin21,22 rd,td
 
 uint8_t recv(char *buf){
 	const auto len = es920lr.getc();
@@ -41,9 +41,13 @@ int main(){
 		if(len == 0) continue;
 
 		if(len == 2 && buf[0] == 'F' && buf[1] == 'L'){
-			can.write(CANMessage(0x01, buf, 1));
-			es920lr.putc(0x11);
-			es920lr.printf("flight mode on...");
+			if(can.write(CANMessage(0x01, buf, 1))){
+				es920lr.putc(0x11);
+				es920lr.printf("flight mode on...");
+			}else{
+				es920lr.putc(0x01);
+				es920lr.putc('C');
+			}
 			while(!recv(buf));
 			wait_ms(250);
 		}
