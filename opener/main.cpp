@@ -21,6 +21,8 @@ union Float2Byte {
 
 void can_recv();
 
+void debug_print();
+
 int main(){
 	global::phase = Phase::standby;
     pc.printf("start opener.\n\r");
@@ -40,7 +42,7 @@ int main(){
 		if(!can.write(msg))
 			pc.printf("error: cannot send phase\r\n");
 
-		pc.printf("phase: %d, accnum: %d, apress: %f, downnum: %d\r\n", (int)static_cast<uint8_t>(phase), (int)global::accnum, global::apress, (int)global::downnum);
+		debug_print();
 
 		switch(phase){
 		case Phase::standby:
@@ -135,4 +137,21 @@ void can_recv(){
 	default:
 		break;
 	}
+}
+
+void debug_print(){
+	const auto &phase = global::phase;
+	const auto &accnum= global::accnum;
+	const auto &downnum= global::downnum;
+	const auto &apress= global::apress;
+
+	pc.printf("phase: ");
+	switch(phase){
+	case Phase::standby:	pc.printf("standby,  "); break;
+	case Phase::flight:		pc.printf("flight,   "); break;
+	case Phase::burning:	pc.printf("burning,  "); break;
+	case Phase::rising:		pc.printf("rising,   "); break;
+	case Phase::parachute:	pc.printf("parachute,"); break;
+	}
+	pc.printf("accnum: %d, apress: %f, downnum: %d\r\n", (int)accnum, apress, (int)downnum);
 }
