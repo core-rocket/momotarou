@@ -4,6 +4,7 @@
 
 Serial pc(PA_9, PA_10, 115200); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, 1000000);
+DigitalIn flight_pin(PA_3);
 
 namespace global {
 	Phase phase;
@@ -21,19 +22,25 @@ int main(){
 	can.attach(can_recv, CAN::RxIrq);
 
 	while(true){
+		const auto &phase = global::phase;
+
 		// フェーズ送信
 		msg.id = static_cast<unsigned int>(MsgID::phase);
-		msg.data[0] = static_cast<uint8_t>(global::phase);
+		msg.data[0] = static_cast<uint8_t>(phase);
 		msg.len = 1;
 		if(!can.write(msg))
 			pc.printf("error: cannot send phase\r\n");
 
-		switch(global::phase){
+		pc.printf("phase: %d\r\n", (int)static_cast<uint8_t>(phase));
+
+		switch(phase){
 		case Phase::standby:
 			// 待機フェーズ: 無線でフライトモードON
 			break;
 		case Phase::flight:
 			// 離床判定
+			if(!flight_pin)
+				global::phase = Phase::burning;
 			break;
 		case Phase::burning:
 			// 加速上昇中
