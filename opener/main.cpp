@@ -44,7 +44,7 @@ int main(){
 		case Phase::parachute:
 			break;
 		}
-		wait_us(50);
+		wait_us(100);
 	}
 }
 
