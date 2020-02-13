@@ -9,7 +9,14 @@ DigitalIn flight_pin(PA_3);
 namespace global {
 	Phase phase;
 	CANMessage recv_msg;
+	float apress;
+	uint8_t downnum;
 }
+
+union Float2Byte {
+    float _float;
+    char _byte[4];
+};
 
 void can_recv();
 
@@ -31,7 +38,7 @@ int main(){
 		if(!can.write(msg))
 			pc.printf("error: cannot send phase\r\n");
 
-		pc.printf("phase: %d\r\n", (int)static_cast<uint8_t>(phase));
+		pc.printf("phase: %d, apress: %f, downnum: %d\r\n", (int)static_cast<uint8_t>(phase), global::apress, (int)global::downnum);
 
 		switch(phase){
 		case Phase::standby:
@@ -46,7 +53,9 @@ int main(){
 			// 加速上昇中
 			break;
 		case Phase::rising:
-			// 慣性飛行: 離床判定
+			// 慣性飛行: 開放判定
+			if(global::downnum > 10)
+				global::phase = Phase::parachute;
 			break;
 		case Phase::parachute:
 			break;
@@ -88,7 +97,14 @@ void can_recv(){
 	case MsgID::air_press:
 		// push to FIFO
 		{
-			const auto apress = get_data<float>(msg);
+			//const auto *apress = get_data<float>(msg);
+			//global::apress = *apress;
+			const Float2Byte *apress = (Float2Byte*)msg.data;
+			if(apress->_float > global::apress)
+				global::downnum++;
+			else
+				global::downnum = 0;
+			global::apress = apress->_float;
 		}
 		break;
 	default:
