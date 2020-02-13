@@ -1,7 +1,7 @@
 #include "mbed.h"
 #include "24LC1025.h"
 
-Serial pc(PA_9, PA_10, 9600);
+Serial pc(PA_9, PA_10, 115200);
 
 LC1025 eeprom = LC1025(PB_7, PB_6);
 
