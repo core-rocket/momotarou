@@ -2,8 +2,8 @@
 #include "../common.h"
 #include "../utility.hpp"
 
-Serial pc(PA_2, PA_3, 115200); //pin8,9 TX,RX
-CAN can(PA_11, PA_12);
+Serial pc(PA_9, PA_10, 115200); //pin8,9 TX,RX
+CAN can(PA_11, PA_12, 1000000);
 
 namespace global {
 	Phase phase;
