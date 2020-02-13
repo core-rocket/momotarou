@@ -26,6 +26,7 @@ int main(){
     pc.printf("start opener.\n\r");
 
 	CANMessage msg;
+	Timer flight_timer;
 
 	can.attach(can_recv, CAN::RxIrq);
 
@@ -47,15 +48,19 @@ int main(){
 			break;
 		case Phase::flight:
 			// 離床判定
-			if(!flight_pin && global::accnum >= 5)
+			if(!flight_pin || global::accnum >= 5){
 				global::phase = Phase::burning;
+				flight_timer.start();
+			}
 			break;
 		case Phase::burning:
 			// 加速上昇中
+			if(flight_timer.read_ms() > 5000)
+				global::phase = Phase::rising;
 			break;
 		case Phase::rising:
 			// 慣性飛行: 開放判定
-			if(global::downnum >= 10)
+			if(global::downnum >= 10 || flight_timer.read_ms() > 14000)
 				global::phase = Phase::parachute;
 			break;
 		case Phase::parachute:
@@ -96,7 +101,7 @@ void can_recv(){
 		// push to FIFO
 		{
 			const Float2Byte *acc = (Float2Byte*)msg.data;
-			if(acc->_float > 1.1)
+			if(acc->_float > 3.0)
 				global::accnum++;
 			else
 				global::accnum = 0;
