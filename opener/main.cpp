@@ -50,6 +50,7 @@ int main(){
 			// 離床判定
 			if(!flight_pin || global::accnum >= 5){
 				global::phase = Phase::burning;
+				flight_timer.reset();
 				flight_timer.start();
 			}
 			break;
