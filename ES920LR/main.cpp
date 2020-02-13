@@ -25,8 +25,19 @@ int check_response(const uint8_t &len, const char *buf){
 		return 1;
 }
 
+uint8_t parse_cmd(const char *buf){
+	if(buf[0] == 'R' && buf[1] == 'S')
+		return 0x00;
+	else if(buf[0] == 'F' && buf[1] == 'L')
+		return 0x01;
+	else if(buf[0] == 'O' && buf[1] == 'P')
+		return 0x02;
+	else if(buf[0] == 'N' && buf[1] == 'F')
+		return 0xf0;
+}
+
 int main(){
-	char buf[100];
+	char buf[50];
     pc.printf("start ES920LR.\n\r");
 
 	wait(5.0);
@@ -40,15 +51,15 @@ int main(){
 		const auto len = recv(buf);
 		if(len == 0) continue;
 
-		if(len == 2 && buf[0] == 'F' && buf[1] == 'L'){
-			char cmd[2];
-			cmd[0] = 0x01;
+		if(len == 2){
+			char cmd[1];
+			cmd[0] = parse_cmd(buf);
 			if(can.write(CANMessage(0x01, cmd, 1))){
-				es920lr.putc(0x11);
-				es920lr.printf("flight mode on...");
+				es920lr.putc(0x10);
+				es920lr.printf("send command: %02X", cmd[0]);
 			}else{
-				es920lr.putc(0x01);
-				es920lr.putc('C');
+				es920lr.putc(0x06);
+				es920lr.printf("failed");
 			}
 			while(!recv(buf));
 			wait_ms(250);
