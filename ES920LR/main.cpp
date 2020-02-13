@@ -1,28 +1,42 @@
 #include "mbed.h"
 
 Serial pc(PA_2, PA_3, 115200); //pin8,9 TX,RX
+Serial es920lr(PA_9, PA_10, 115200);
+
+uint8_t buf[50];
+
+bool recv(){
+	const auto len = es920lr.getc();
+	if(len < 0)
+		return false;
+	for(uint8_t i=0;i<len;i++){
+		if(len > 50)
+			break;
+		buf[i] = es920lr.getc();
+	}
+
+	return true;
+}
+
+
 
 int main(){
     pc.printf("start TWE-Lite.\n\r");
 
-	Serial es920lr(PA_9, PA_10, 115200);
-
-	//uint8_t length;
-
-	//length = 1;
-	//es920lr.putc(length);
-	//es920lr.putc('A');
-	//wait(1.8);
 	wait(5.0);
 
+	es920lr.printf("start\r\n");
+
 	while(true){
-		for(uint8_t len=1;len<=50;len++){
+		if(recv()){
+			uint8_t len = 50;
+			es920lr.putc(len);
 			for(uint8_t i=0;i<len;i++){
-				es920lr.printf("A");
+				es920lr.putc(buf[i]);
 			}
-			es920lr.printf("\r\n");
-			pc.printf("send %d\r\n", len);
-			wait_ms(250);
+			while(!recv());
+			if(buf[0] == 'O' && buf[1] == 'K')
+				wait_ms(250);
 		}
 	}
 }
