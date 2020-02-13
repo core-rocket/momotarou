@@ -26,14 +26,17 @@ int check_response(const uint8_t &len, const char *buf){
 }
 
 uint8_t parse_cmd(const char *buf){
-	if(buf[0] == 'R' && buf[1] == 'S')
+	if(buf[0] == 'R' && buf[1] == 'S'){
 		return 0x00;
-	else if(buf[0] == 'F' && buf[1] == 'L')
+	}else if(buf[0] == 'F' && buf[1] == 'L'){
 		return 0x01;
-	else if(buf[0] == 'O' && buf[1] == 'P')
+	}else if(buf[0] == 'O' && buf[1] == 'P'){
 		return 0x02;
-	else if(buf[0] == 'N' && buf[1] == 'F')
+	}else if(buf[0] == 'N' && buf[1] == 'F'){
 		return 0xf0;
+	}else{
+		return 0xff;
+	}
 }
 
 int main(){
@@ -54,6 +57,7 @@ int main(){
 		if(len == 2){
 			char cmd[1];
 			cmd[0] = parse_cmd(buf);
+			if(cmd[0] == 0xff) continue;
 			if(can.write(CANMessage(0x01, cmd, 1))){
 				es920lr.putc(0x10);
 				es920lr.printf("send command: %02X", cmd[0]);
