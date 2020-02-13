@@ -34,6 +34,8 @@ int main(){
 
 	while(true){
 		const auto &phase = global::phase;
+		const auto &accnum = global::accnum;
+		const auto &downnum = global::downnum;
 
 		// フェーズ送信
 		msg.id = static_cast<unsigned int>(MsgID::phase);
@@ -50,10 +52,21 @@ int main(){
 			break;
 		case Phase::flight:
 			// 離床判定
-			if(!flight_pin || global::accnum >= 5){
-				global::phase = Phase::burning;
-				flight_timer.reset();
-				flight_timer.start();
+			{
+				const bool is_pin = !flight_pin;
+				const bool is_acc = accnum >= 5;
+				if(is_pin || is_acc){
+					global::phase = Phase::burning;
+					flight_timer.reset();
+					flight_timer.start();
+
+					pc.printf("LIFT OFF: ");
+					if(is_pin)
+						pc.printf("pin ");
+					if(is_acc)
+						pc.printf("acc");
+					pc.printf("\r\n");
+				}
 			}
 			break;
 		case Phase::burning:
@@ -63,8 +76,20 @@ int main(){
 			break;
 		case Phase::rising:
 			// 慣性飛行: 開放判定
-			if(global::downnum >= 10 || flight_timer.read_ms() > 14000)
-				global::phase = Phase::parachute;
+			{
+				const bool is_down = downnum >= 10;
+				const bool is_burnout = flight_timer.read_ms() > 14000;
+				if(is_down || is_burnout){
+					global::phase = Phase::parachute;
+
+					pc.printf("PARACHUTE OPEN: ");
+					if(is_down)
+						pc.printf("down ");
+					if(is_burnout)
+						pc.printf("timer");
+					pc.printf("\r\n");
+				}
+			}
 			break;
 		case Phase::parachute:
 			break;
