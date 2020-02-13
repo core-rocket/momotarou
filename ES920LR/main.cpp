@@ -41,7 +41,9 @@ int main(){
 		if(len == 0) continue;
 
 		if(len == 2 && buf[0] == 'F' && buf[1] == 'L'){
-			if(can.write(CANMessage(0x01, buf, 1))){
+			char cmd[2];
+			cmd[0] = 0x01;
+			if(can.write(CANMessage(0x01, cmd, 1))){
 				es920lr.putc(0x11);
 				es920lr.printf("flight mode on...");
 			}else{
