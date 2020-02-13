@@ -86,9 +86,20 @@ void can_recv(){
 		// とりあえず0x01をフライトモードONとする
 		// 後で必ずちゃんと決めること！！！！！！！
 		switch(msg.data[0]){
-		case 0x01: // flight mode ON
-			pc.printf("FLIGHT MODE ON!!!!!!!\r\n");
+		case 0x00:	// reset
+			pc.printf("reset\r\n");
+			global::phase = Phase::standby;
+			break;
+		case 0x01:	// flight mode ON
+			pc.printf("FLIGHT MODE ON\r\n");
 			global::phase = Phase::flight;
+			break;
+		case 0x02:	// open parachute
+			if(global::phase == Phase::rising){
+				global::phase = Phase::parachute;
+			}
+			break;
+		case 0xf0:	// no flight pin
 			break;
 		default:
 			pc.printf("error: unknown command(%d)\r\n", (int)msg.data[0]);
