@@ -1,12 +1,12 @@
 /*
 MPU9250から9軸データを取得してCAN送信・シリアル送信．
-9軸データ->5回移動平均．
+ノルムは5回移動平均から算出．
+生データも送る．
 姿勢角を出す．
 <MPU9250ピン設定>
 CS~ : HIGH
 ADO : LOW
 SDA/SCL 10kΩでpullup
-20191023
 */
 #include "mbed.h"
 #include "MPU9250.h"
@@ -35,6 +35,7 @@ float ax = 0.0, ay = 0.0, az = 0.0;
 float gx = 0.0, gy = 0.0, gz = 0.0;
 float mx = 0.0, my = 0.0, mz = 0.0;
 int cnt = 0;
+float a_norm = 0.0;
 
 union Float2Byte{
     float _float;
@@ -137,15 +138,15 @@ int main(){
         mx_new = mag[0] * 0.15;
         my_new = mag[1] * 0.15;
         mz_new = mag[2] * 0.15;
-        buff_ax[cnt] = acc[0] / 2049.81;
-        buff_ay[cnt] = acc[1] / 2049.81;
-        buff_az[cnt] = acc[2] / 2049.81;
-        buff_gx[cnt] = gyr[0] * 0.03048;
-        buff_gy[cnt] = gyr[1] * 0.03048;
-        buff_gz[cnt] = gyr[2] * 0.03048;
-        buff_mx[cnt] = mag[0] * 0.15;
-        buff_my[cnt] = mag[1] * 0.15;
-        buff_mz[cnt] = mag[2] * 0.15;
+        buff_ax[cnt] = ax_new;
+        buff_ay[cnt] = ay_new;
+        buff_az[cnt] = az_new;
+        buff_gx[cnt] = gx_new;
+        buff_gy[cnt] = gy_new;
+        buff_gz[cnt] = gz_new;
+        buff_mx[cnt] = mx_new;
+        buff_my[cnt] = my_new;
+        buff_mz[cnt] = mz_new;
         sum_ax = sum_ax + buff_ax[cnt];
         sum_ay = sum_ay + buff_ay[cnt];
         sum_az = sum_az + buff_az[cnt];
@@ -165,22 +166,27 @@ int main(){
         gz = sum_gz/N;
         mx = sum_mx/N;
         my = sum_my/N;
-        mz = sum_mz/N;        
+        mz = sum_mz/N;
+
+        a_norm = sqrt(ax*ax + ay*ay + az*az);
+
         /*
         姿勢角計算をする．
-        */        
-        pc.printf("acc:%f,%f,%f\n\r", ax, ay, az);
-        pc.printf("gyr:%f,%f,%f\n\r", gx, gy, gz);
-        pc.printf("mag:%f,%f,%f\n\r", mx, my, mz);
-        send(0x04, ax, 'x');
-        send(0x04, ay, 'y');
-        send(0x04, az, 'z');
-        send(0x07, gx, 'x');
-        send(0x07, gy, 'y');
-        send(0x07, gz, 'z');
-        send(0x0B, mx, 'x');
-        send(0x0B, my, 'y');
-        send(0x0B, mz, 'z');
+        */ 
+       pc.printf("a_norm:%f\n\r", a_norm);       
+        pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
+        pc.printf("gyr_ave:%f,%f,%f\n\r", gx, gy, gz);
+        pc.printf("mag_ave:%f,%f,%f\n\r", mx, my, mz);
+        send(0x04, a_norm, 'a');
+        send(0x07, ax_new, 'x');
+        send(0x07, ay_new, 'y');
+        send(0x07, az_new, 'z');
+        send(0x08, gx_new, 'x');
+        send(0x08, gy_new, 'y');
+        send(0x08, gz_new, 'z');
+        send(0x0C, mx_new, 'x');
+        send(0x0C, my_new, 'y');
+        send(0x0C, mz_new, 'z');
         wait(0.001);
     }
 }
