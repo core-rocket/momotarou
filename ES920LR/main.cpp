@@ -30,7 +30,7 @@ uint8_t parse_cmd(const char *buf){
 		return 0x00;
 	}else if(buf[0] == 'F' && buf[1] == 'L'){
 		return 0x01;
-	}else if(buf[0] == 'O' && buf[1] == 'P'){
+	}else if(buf[0] == 'L' && buf[1] == 'A'){
 		return 0x02;
 	}else if(buf[0] == 'N' && buf[1] == 'F'){
 		return 0xf0;
