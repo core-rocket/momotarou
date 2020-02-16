@@ -1,10 +1,10 @@
 /*
 SDカードに整数を書き込む．
 <pin接続>
-NSS: pin25 --- pin2 CD/DAT3
-SCK: pin26 --- pin5 CLK
-MISO:pin27 --- pin7 DAT0
-MOSI:pin28 --- pin3 CMD
+NSS: pin10 --- pin2 CD/DAT3
+SCK: pin11 --- pin5 CLK
+MISO:pin12 --- pin7 DAT0
+MOSI:pin13 --- pin3 CMD
 */
 #include "mbed.h"
 #include "SDFileSystem.h"
@@ -13,7 +13,7 @@ MOSI:pin28 --- pin3 CMD
 DigitalOut myled(PB_1); //pin15
 Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
 
-SDFileSystem sd = SDFileSystem(PB_5, PB_4, PB_3, PA_15, "sd"); //pin28,27,26,25
+SDFileSystem sd = SDFileSystem(PA_7, PA_6, PA_5, PA_4, "sd"); //MOSI,MISO,SCK,CS
 
 int main(){
     wait(1.0); //気持ち
