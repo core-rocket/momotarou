@@ -8,6 +8,7 @@ DigitalIn flight_pin(PA_3);
 DigitalOut hamada(PA_1);
 
 namespace global {
+	bool flag_manual_launch_clear;
 	Phase phase;
 	CANMessage recv_msg;
 	float apress;
@@ -26,6 +27,7 @@ void debug_print();
 
 int main(){
 	hamada = 0;
+	global::flag_manual_launch_clear = false;
 	global::phase = Phase::standby;
     pc.printf("start opener.\n\r");
 
@@ -57,9 +59,10 @@ int main(){
 			// 離床判定
 			hamada = 0;
 			{
+				const auto &manual_launch = global::flag_manual_launch_clear;
 				const bool is_pin = !flight_pin;
 				const bool is_acc = accnum >= 5;
-				if(is_pin || is_acc){
+				if(is_pin || is_acc || manual_launch){
 					global::phase = Phase::burning;
 					flight_timer.reset();
 					flight_timer.start();
@@ -68,7 +71,9 @@ int main(){
 					if(is_pin)
 						pc.printf("pin ");
 					if(is_acc)
-						pc.printf("acc");
+						pc.printf("acc ");
+					if(manual_launch)
+						pc.printf("manual");
 					pc.printf("\r\n");
 				}
 			}
@@ -83,8 +88,13 @@ int main(){
 			// 慣性飛行: 開放判定
 			hamada = 0;
 			{
+				const auto &manual_launch = global::flag_manual_launch_clear;
 				const bool is_down = downnum >= 10;
-				const bool is_burnout = flight_timer.read_ms() > 14000;
+				const bool is_timeout = flight_timer.read_ms() > 14000;
+
+				// 手動で離床確認した場合，タイムアウト開傘を無効化
+				const bool is_burnout = (manual_launch ? false : is_timeout);
+
 				if(is_down || is_burnout){
 					global::phase = Phase::parachute;
 
@@ -129,10 +139,8 @@ void can_recv(){
 			pc.printf("FLIGHT MODE ON\r\n");
 			global::phase = Phase::flight;
 			break;
-		case 0x02:	// open parachute
-			if(global::phase == Phase::rising){
-				global::phase = Phase::parachute;
-			}
+		case 0x02:	// ランチクリア確認コマンド
+			global::flag_manual_launch_clear = true;
 			break;
 		case 0xf0:	// no flight pin
 			break;
