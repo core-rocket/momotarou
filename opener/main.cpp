@@ -5,6 +5,7 @@
 Serial pc(PA_9, PA_10, 115200); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, 1000000);
 DigitalIn flight_pin(PA_3);
+DigitalOut hamada(PA_1);
 
 namespace global {
 	Phase phase;
@@ -24,6 +25,7 @@ void can_recv();
 void debug_print();
 
 int main(){
+	hamada = 0;
 	global::phase = Phase::standby;
     pc.printf("start opener.\n\r");
 
@@ -49,9 +51,11 @@ int main(){
 		switch(phase){
 		case Phase::standby:
 			// 待機フェーズ: 無線でフライトモードON
+			hamada = 0;
 			break;
 		case Phase::flight:
 			// 離床判定
+			hamada = 0;
 			{
 				const bool is_pin = !flight_pin;
 				const bool is_acc = accnum >= 5;
@@ -71,11 +75,13 @@ int main(){
 			break;
 		case Phase::burning:
 			// 加速上昇中
+			hamada = 0;
 			if(flight_timer.read_ms() > 5000)
 				global::phase = Phase::rising;
 			break;
 		case Phase::rising:
 			// 慣性飛行: 開放判定
+			hamada = 0;
 			{
 				const bool is_down = downnum >= 10;
 				const bool is_burnout = flight_timer.read_ms() > 14000;
@@ -92,6 +98,7 @@ int main(){
 			}
 			break;
 		case Phase::parachute:
+			hamada = 1;
 			break;
 		}
 		wait_us(100);
