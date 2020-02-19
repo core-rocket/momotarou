@@ -1,5 +1,6 @@
 #include "mbed.h"
 #include "../common.h"
+#include "../telemetry.hpp"
 #include "../utility.hpp"
 
 Serial pc(PA_9, PA_10, BRATE); //pin8,9 TX,RX
@@ -116,6 +117,7 @@ int main(){
 }
 
 void can_recv(){
+	using namespace telemetry;
 	using namespace utility::can;
 
 	if(can.read(global::recv_msg) == 0)
@@ -128,21 +130,19 @@ void can_recv(){
 			pc.printf("error: unknown length command\r\n");
 			return;
 		}
-		// とりあえず0x01をフライトモードONとする
-		// 後で必ずちゃんと決めること！！！！！！！
-		switch(msg.data[0]){
-		case 0x00:	// reset
+		switch(static_cast<Cmd>(msg.data[0])){
+		case Cmd::reset:	// reset
 			pc.printf("reset\r\n");
 			global::phase = Phase::standby;
 			break;
-		case 0x01:	// flight mode ON
+		case Cmd::flight:	// flight mode ON
 			pc.printf("FLIGHT MODE ON\r\n");
 			global::phase = Phase::flight;
 			break;
-		case 0x02:	// ランチクリア確認コマンド
+		case Cmd::launch_clear:	// ランチクリア確認コマンド
 			global::flag_manual_launch_clear = true;
 			break;
-		case 0xf0:	// no flight pin
+		case Cmd::no_flight_pin:	// no flight pin
 			break;
 		default:
 			pc.printf("error: unknown command(%d)\r\n", (int)msg.data[0]);
