@@ -1,6 +1,9 @@
 #ifndef COMMON_HPP_
 #define COMMON_HPP_
 
+#define BRATE		115200
+#define CAN_SPEED	1000000
+
 enum class Phase : uint8_t {
 	standby,
 	flight,
