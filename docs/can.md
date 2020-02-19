@@ -14,9 +14,10 @@ IDとデータ種の対応は以下．
 |0x04|合成加速度|MPU         |opener,TWE|
 |0x05|GPS       |GPS         |ES,TWE,SD|
 |0x06|フェーズ  |opener      |ES,TWE,SD|
-|0x07|3軸加速度 |MPU         |TWE,SD|
-|0x08|3軸角速度 |MPU         |TWE,SD|
-|0x09|燃焼室圧力|圧力センサ  |TWE,SD|
-|0x0A|動圧      |ノーズ      |TWE,SD|
-|0x0B|気温      |BME         |TWE,SD|
-|0x0C|地磁気    |MPU         |TWE,SD|
+|0x07|姿勢角    |MPU         |TWE,SD|
+|0x08|3軸加速度 |MPU         |TWE,SD|
+|0x09|3軸角速度 |MPU         |TWE,SD|
+|0x0A|燃焼室圧力|圧力センサ  |TWE,SD|
+|0x0B|動圧      |ノーズ      |TWE,SD|
+|0x0C|気温      |BME         |TWE,SD|
+|0x0D|地磁気    |MPU         |TWE,SD|
