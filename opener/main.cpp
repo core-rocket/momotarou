@@ -39,6 +39,7 @@ size_t time_ms(){ return global::flight_timer.read_ms(); }
 
 void init();
 void can_recv();
+void parse_cmd(const CANMessage &msg);
 
 #ifdef DEBUG
 	void debug_print();
@@ -162,28 +163,7 @@ void can_recv(){
 	const auto &msg = global::recv_msg;
 	switch(static_cast<MsgID>(msg.id)){
 	case MsgID::command:
-		if(msg.len != 1){
-			pc.printf("error: unknown length command\r\n");
-			return;
-		}
-		switch(static_cast<Cmd>(msg.data[0])){
-		case Cmd::reset:	// reset
-			pc.printf("reset\r\n");
-			global::phase = Phase::standby;
-			break;
-		case Cmd::flight:	// flight mode ON
-			pc.printf("FLIGHT MODE ON\r\n");
-			global::phase = Phase::flight;
-			break;
-		case Cmd::launch_clear:	// ランチクリア確認コマンド
-			global::flag_manual_launch_clear = true;
-			break;
-		case Cmd::no_flight_pin:	// no flight pin
-			break;
-		default:
-			pc.printf("error: unknown command(%d)\r\n", (int)msg.data[0]);
-			break;
-		}
+		parse_cmd(msg);
 		break;
 	case MsgID::error:
 		break;
@@ -211,6 +191,34 @@ void can_recv(){
 		}
 		break;
 	default:
+		break;
+	}
+}
+
+void parse_cmd(const CANMessage &msg){
+	using namespace telemetry;
+
+	if(msg.len != 1){
+		pc.printf("error: unknown length command\r\n");
+		return;
+	}
+
+	switch(static_cast<Cmd>(msg.data[0])){
+	case Cmd::reset:	// reset
+		pc.printf("reset\r\n");
+		global::phase = Phase::standby;
+		break;
+	case Cmd::flight:	// flight mode ON
+		pc.printf("FLIGHT MODE ON\r\n");
+		global::phase = Phase::flight;
+		break;
+	case Cmd::launch_clear:	// ランチクリア確認コマンド
+		global::flag_manual_launch_clear = true;
+		break;
+	case Cmd::no_flight_pin:	// no flight pin
+		break;
+	default:
+		pc.printf("error: unknown command(%d)\r\n", (int)msg.data[0]);
 		break;
 	}
 }
