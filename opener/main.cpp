@@ -3,6 +3,8 @@
 #include "../telemetry.hpp"
 #include "../utility.hpp"
 
+#define DEBUG
+
 Serial pc(PA_9, PA_10, BRATE); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, CAN_SPEED);
 DigitalIn flight_pin(PA_3);
@@ -26,7 +28,9 @@ union Float2Byte {
 size_t time_ms(){ return global::flight_timer.read_ms(); }
 void can_recv();
 
-void debug_print();
+#ifdef DEBUG
+	void debug_print();
+#endif
 
 int main(){
 	hamada = 0;
@@ -50,7 +54,9 @@ int main(){
 		if(!can.write(msg))
 			pc.printf("error: cannot send phase\r\n");
 
-		debug_print();
+		#ifdef DEBUG
+			debug_print();
+		#endif
 
 		switch(phase){
 		case Phase::standby:
@@ -113,7 +119,7 @@ int main(){
 			hamada = 1;
 			break;
 		}
-		wait_us(100);
+		wait_us(100);	// 50us待たないとCAN送信でエラーが起こる．マージン取って100us．
 	}
 }
 
@@ -180,6 +186,7 @@ void can_recv(){
 	}
 }
 
+#ifdef DEBUG
 void debug_print(){
 	const auto &phase = global::phase;
 	const auto &accnum= global::accnum;
@@ -197,3 +204,4 @@ void debug_print(){
 	}
 	pc.printf("accnum: %d, apress: %f, downnum: %d\r\n", (int)accnum, apress, (int)downnum);
 }
+#endif
