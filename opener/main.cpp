@@ -213,7 +213,7 @@ void debug_print(){
 	const auto &apress= global::apress;
 
 	pc.printf("%d:%f:%f ", loop_num, boot_time_ms() / 1000.0, time_ms() / 1000.0);
-	pc.printf(" canerr=%d ", err_can);
+	pc.printf(" canerr=%f%% ", 100.0 * err_can / loop_num);
 	pc.printf("phase: ");
 	switch(phase){
 	case Phase::standby:	pc.printf("standby,  "); break;
