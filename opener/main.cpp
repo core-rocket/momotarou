@@ -30,6 +30,8 @@ union Float2Byte {
 
 size_t boot_time_ms(){ return global::boot_timer.read_ms(); }
 size_t time_ms(){ return global::flight_timer.read_ms(); }
+
+void init();
 void can_recv();
 
 #ifdef DEBUG
@@ -37,16 +39,7 @@ void can_recv();
 #endif
 
 int main(){
-	hamada = 0;
-	global::loop_num = 0;
-	global::flag_manual_launch_clear = false;
-	global::phase = Phase::standby;
-	global::apress = 0.0;
-	global::accnum = 0;
-	global::downnum = 0;
-	global::err_cansend = 0;
-
-	global::boot_timer.start();
+	init();
 
     pc.printf("start opener.\n\r");
 
@@ -138,6 +131,19 @@ int main(){
 		wait_us(100);	// 50us待たないとCAN送信でエラーが起こる．マージン取って100us．
 		global::loop_num++;
 	}
+}
+
+void init(){
+	hamada = 0;
+	global::loop_num = 0;
+	global::flag_manual_launch_clear = false;
+	global::phase = Phase::standby;
+	global::apress = 0.0;
+	global::accnum = 0;
+	global::downnum = 0;
+	global::err_cansend = 0;
+
+	global::boot_timer.start();
 }
 
 void can_recv(){
