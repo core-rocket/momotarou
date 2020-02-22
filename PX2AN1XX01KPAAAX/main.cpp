@@ -1,17 +1,17 @@
 #include "mbed.h"
 /*
-Vout 0.5~4.5[V]
-analogIn 0.333~3.0[V]
-coefficient:6.895/(3.0-0.333)=2.5853
+Vout[V]    :0.5 -> 4.5
+analogIn[V]:0.333 -> 3.0
+range[Mpa] :0 -> 7
 */
 AnalogIn analogin(PA_0); //pin6
 Serial pc(PA_9, PA_10, 115200); //pin19,20 TX,RX
 CAN can(PA_11, PA_12, 1000000); //pin21,22 rd,td
 
 float sensorvalue = 0.0;
-float offset = 0.0;
+float offset = 0.8849;
 float chamberpressure = 0.0;
-float coefficient = 2.5853;
+float coefficient = 2.6249;
 char senddata[5];
 
 union Float2Byte{
@@ -35,15 +35,15 @@ int main(){
     wait(0.1);
     pc.printf("Start.\n\r");
     while(1){
-        sensorvalue = analogin.read()*3.3f - offset;
-        if(sensorvalue > 0.33){
-            chamberpressure = sensorvalue * coefficient;
+        sensorvalue = analogin.read()*3.3f;
+        if(sensorvalue > 0.333){
+            chamberpressure = sensorvalue * coefficient - offset;
         }
         else{
             chamberpressure = 0.0;
         }
         pc.printf("Voltage: %f\n\r", sensorvalue);
         pc.printf("Pressure[MPa]: %f\n\r", chamberpressure);
-        send(0x08, chamberpressure, 'c');
+        send(0x0A, chamberpressure, 'c');
     }
 }
