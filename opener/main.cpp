@@ -20,7 +20,7 @@ namespace global {
 	size_t loop_num;
 	bool flag_manual_launch_clear;
 	Phase phase;
-	float apress;
+	float accnorm, apress;
 	uint8_t accnum;
 	uint8_t downnum;
 	size_t err_cansend;
@@ -145,6 +145,7 @@ void init(){
 	global::loop_num = 0;
 	global::flag_manual_launch_clear = false;
 	global::phase = Phase::standby;
+	global::accnorm= 0.0;
 	global::apress = 0.0;
 	global::accnum = 0;
 	global::downnum = 0;
@@ -175,6 +176,7 @@ void can_recv(){
 				global::accnum++;
 			else
 				global::accnum = 0;
+			global::accnorm = acc->_float;
 		}
 		break;
 	case MsgID::air_press:
@@ -198,6 +200,8 @@ void can_recv(){
 void parse_cmd(const CANMessage &msg){
 	using namespace telemetry;
 
+	const auto &phase = global::phase;
+
 	if(msg.len != 1){
 		pc.printf("error: unknown length command\r\n");
 		return;
@@ -207,13 +211,19 @@ void parse_cmd(const CANMessage &msg){
 	case Cmd::reset:	// reset
 		pc.printf("reset\r\n");
 		global::phase = Phase::standby;
+		global::flight_timer.stop();
+		global::flight_timer.reset();
 		break;
 	case Cmd::flight:	// flight mode ON
-		pc.printf("FLIGHT MODE ON\r\n");
-		global::phase = Phase::flight;
+		if(phase == Phase::standby){
+			pc.printf("FLIGHT MODE ON\r\n");
+			global::phase = Phase::flight;
+		}
 		break;
 	case Cmd::launch_clear:	// ランチクリア確認コマンド
-		global::flag_manual_launch_clear = true;
+		if(phase == Phase::standby){
+			global::flag_manual_launch_clear = true;
+		}
 		break;
 	case Cmd::no_flight_pin:	// no flight pin
 		break;
@@ -230,9 +240,10 @@ void debug_print(){
 	const auto &phase = global::phase;
 	const auto &accnum= global::accnum;
 	const auto &downnum= global::downnum;
+	const auto &accnorm= global::accnorm;
 	const auto &apress= global::apress;
 
-	pc.printf("%d:%f:%f ", loop_num, boot_time_ms() / 1000.0, time_ms() / 1000.0);
+	pc.printf("%10d:%f:%f ", loop_num, boot_time_ms() / 1000.0, time_ms() / 1000.0);
 	pc.printf(" canerr=%f%% ", 100.0 * err_can / loop_num);
 	pc.printf("phase: ");
 	switch(phase){
@@ -242,6 +253,7 @@ void debug_print(){
 	case Phase::rising:		pc.printf("rising,   "); break;
 	case Phase::parachute:	pc.printf("parachute,"); break;
 	}
-	pc.printf("accnum: %d, apress: %f, downnum: %d\r\n", (int)accnum, apress, (int)downnum);
+	pc.printf("accnorm: %f, apress: %f, ", accnorm, apress);
+	pc.printf("accnum: %d, downnum: %d\r\n", (int)accnum, (int)downnum);
 }
 #endif
