@@ -11,13 +11,16 @@ DigitalIn flight_pin(PA_3);
 DigitalOut hamada(PA_1);
 
 namespace global {
+	size_t loop_num;
 	bool flag_manual_launch_clear;
-	Timer flight_timer;
 	Phase phase;
-	CANMessage recv_msg;
 	float apress;
 	uint8_t accnum;
 	uint8_t downnum;
+	size_t err_cansend;
+
+	Timer boot_timer, flight_timer;
+	CANMessage recv_msg;
 }
 
 union Float2Byte {
@@ -25,6 +28,7 @@ union Float2Byte {
     char _byte[4];
 };
 
+size_t boot_time_ms(){ return global::boot_timer.read_ms(); }
 size_t time_ms(){ return global::flight_timer.read_ms(); }
 void can_recv();
 
@@ -34,8 +38,16 @@ void can_recv();
 
 int main(){
 	hamada = 0;
+	global::loop_num = 0;
 	global::flag_manual_launch_clear = false;
 	global::phase = Phase::standby;
+	global::apress = 0.0;
+	global::accnum = 0;
+	global::downnum = 0;
+	global::err_cansend = 0;
+
+	global::boot_timer.start();
+
     pc.printf("start opener.\n\r");
 
 	CANMessage msg;
@@ -43,6 +55,7 @@ int main(){
 	can.attach(can_recv, CAN::RxIrq);
 
 	while(true){
+		const auto &loop_num = global::loop_num;
 		const auto &phase = global::phase;
 		const auto &accnum = global::accnum;
 		const auto &downnum = global::downnum;
@@ -51,11 +64,14 @@ int main(){
 		msg.id = static_cast<unsigned int>(MsgID::phase);
 		msg.data[0] = static_cast<uint8_t>(phase);
 		msg.len = 1;
-		if(!can.write(msg))
-			pc.printf("error: cannot send phase\r\n");
+		if(!can.write(msg)){
+			global::err_cansend++;
+		}
 
 		#ifdef DEBUG
+		if(loop_num % 1000 == 0){
 			debug_print();
+		}
 		#endif
 
 		switch(phase){
@@ -120,6 +136,7 @@ int main(){
 			break;
 		}
 		wait_us(100);	// 50us待たないとCAN送信でエラーが起こる．マージン取って100us．
+		global::loop_num++;
 	}
 }
 
@@ -188,12 +205,15 @@ void can_recv(){
 
 #ifdef DEBUG
 void debug_print(){
+	const auto &loop_num = global::loop_num;
+	const auto &err_can = global::err_cansend;
 	const auto &phase = global::phase;
 	const auto &accnum= global::accnum;
 	const auto &downnum= global::downnum;
 	const auto &apress= global::apress;
 
-	pc.printf("%f ", time_ms() / 1000.0);
+	pc.printf("%d:%f:%f ", loop_num, boot_time_ms() / 1000.0, time_ms() / 1000.0);
+	pc.printf(" canerr=%d ", err_can);
 	pc.printf("phase: ");
 	switch(phase){
 	case Phase::standby:	pc.printf("standby,  "); break;
