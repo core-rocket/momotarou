@@ -5,6 +5,12 @@
 
 #define DEBUG
 
+#define ACC_NORM_CHECK_VALUE	  3.0
+#define ACC_NUM_CHECK			    5
+#define DOWN_NUM_CHECK			   10
+#define BURNING_TIMEOUT_MS		 5000
+#define PARACHUTE_TIMEOUT_MS	14000
+
 Serial pc(PA_9, PA_10, BRATE); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, CAN_SPEED);
 DigitalIn flight_pin(PA_3);
@@ -78,7 +84,7 @@ int main(){
 			{
 				const auto &manual_launch = global::flag_manual_launch_clear;
 				const bool is_pin = !flight_pin;
-				const bool is_acc = accnum >= 5;
+				const bool is_acc = accnum >= ACC_NUM_CHECK;
 				if(is_pin || is_acc || manual_launch){
 					global::phase = Phase::burning;
 					global::flight_timer.reset();
@@ -98,7 +104,7 @@ int main(){
 		case Phase::burning:
 			// 加速上昇中
 			hamada = 0;
-			if(time_ms() > 5000)
+			if(time_ms() > BURNING_TIMEOUT_MS)
 				global::phase = Phase::rising;
 			break;
 		case Phase::rising:
@@ -106,8 +112,8 @@ int main(){
 			hamada = 0;
 			{
 				const auto &manual_launch = global::flag_manual_launch_clear;
-				const bool is_down = downnum >= 10;
-				const bool is_timeout = time_ms() > 14000;
+				const bool is_down = downnum >= DOWN_NUM_CHECK;
+				const bool is_timeout = time_ms() > PARACHUTE_TIMEOUT_MS;
 
 				// 手動で離床確認した場合，タイムアウト開傘を無効化
 				const bool is_burnout = (manual_launch ? false : is_timeout);
@@ -185,7 +191,7 @@ void can_recv(){
 		// push to FIFO
 		{
 			const Float2Byte *acc = (Float2Byte*)msg.data;
-			if(acc->_float > 3.0)
+			if(acc->_float > ACC_NORM_CHECK_VALUE)
 				global::accnum++;
 			else
 				global::accnum = 0;
