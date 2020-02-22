@@ -10,6 +10,7 @@ DigitalOut hamada(PA_1);
 
 namespace global {
 	bool flag_manual_launch_clear;
+	Timer flight_timer;
 	Phase phase;
 	CANMessage recv_msg;
 	float apress;
@@ -22,6 +23,7 @@ union Float2Byte {
     char _byte[4];
 };
 
+size_t time_ms(){ return global::flight_timer.read_ms(); }
 void can_recv();
 
 void debug_print();
@@ -33,7 +35,6 @@ int main(){
     pc.printf("start opener.\n\r");
 
 	CANMessage msg;
-	Timer flight_timer;
 
 	can.attach(can_recv, CAN::RxIrq);
 
@@ -65,8 +66,8 @@ int main(){
 				const bool is_acc = accnum >= 5;
 				if(is_pin || is_acc || manual_launch){
 					global::phase = Phase::burning;
-					flight_timer.reset();
-					flight_timer.start();
+					global::flight_timer.reset();
+					global::flight_timer.start();
 
 					pc.printf("LIFT OFF: ");
 					if(is_pin)
@@ -82,7 +83,7 @@ int main(){
 		case Phase::burning:
 			// 加速上昇中
 			hamada = 0;
-			if(flight_timer.read_ms() > 5000)
+			if(time_ms() > 5000)
 				global::phase = Phase::rising;
 			break;
 		case Phase::rising:
@@ -91,7 +92,7 @@ int main(){
 			{
 				const auto &manual_launch = global::flag_manual_launch_clear;
 				const bool is_down = downnum >= 10;
-				const bool is_timeout = flight_timer.read_ms() > 14000;
+				const bool is_timeout = time_ms() > 14000;
 
 				// 手動で離床確認した場合，タイムアウト開傘を無効化
 				const bool is_burnout = (manual_launch ? false : is_timeout);
@@ -185,6 +186,7 @@ void debug_print(){
 	const auto &downnum= global::downnum;
 	const auto &apress= global::apress;
 
+	pc.printf("%f ", time_ms() / 1000.0);
 	pc.printf("phase: ");
 	switch(phase){
 	case Phase::standby:	pc.printf("standby,  "); break;
