@@ -9,29 +9,53 @@ CAN can(PA_11, PA_12, CAN_SPEED);
 
 namespace global {
 	CANMessage can_msg;
+
+	utility::queue<float, 10> apress;
 }
+
+union Float2Byte {
+	float _float;
+	char _byte[4];
+};
 
 void can_recv();
 
 int main(){
-	TWE_Lite twe(PA_9, PA_10, 115200);
+	TWE_Lite twe(PA_9, PA_10, BRATE);
+	Timer boot_timer;
+
+	boot_timer.start();
 
 	pc.printf("start TWE-Lite.\n\r");
 	twe.init();
 	can.attach(can_recv, CAN::RxIrq);
 
-	char msgbuf[250];
-	for(int i=0;i<250;i++){
-		msgbuf[i] = 'T';
-	}
-
+	size_t loop_num = 0;
+	size_t send_cnt = 0;
+	size_t send_err = 0;
 	while(true){
-		for(int len=1;len<16;len++){
-			twe.send_buf_extend(0x00, 0x00, msgbuf, len);
-			const auto ret = twe.check_send();
-			pc.printf("ret: %d\n\r", ret);
-			wait_ms(1000);
+		const auto &apress = global::apress;
+
+		float send_buf[10];
+
+		if(loop_num % 10000 == 0){
+			pc.printf("queue=%d err=%d ", apress.size(), send_err);
+			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
+			const auto time_sec = boot_timer.read_ms() / 1000.0;
+			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
+
+		if(apress.size() >= 5){
+			for(size_t i=0;i<5;i++)
+				send_buf[i] = global::apress.pop();
+			twe.send_buf_simple(0x01, 0x00, send_buf, sizeof(float)*5);
+
+			if(twe.check_send() == 1)
+				send_cnt++;
+			else
+				send_err++;
+		}
+		loop_num++;
 	}
 }
 
@@ -46,6 +70,10 @@ void can_recv(){
 
 	switch(static_cast<MsgID>(msg.id)){
 	case MsgID::air_press:
+		{
+			const auto *apress = (Float2Byte*)msg.data;
+			global::apress.push(apress->_float);
+		}
 		break;
 	default:
 		break;
