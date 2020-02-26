@@ -1,2 +1,7 @@
 mbed-os/
 compile.log
+.temp/
+BUILD/
+mbed/
+mbed_settings.py
+*.pyc
