@@ -25,6 +25,8 @@ namespace utility {
 		auto front() const -> const T& { return buf[read]; }
 
 		auto push(const T &val) -> void {
+			if(siz == BUFSIZE)
+				return;
 			buf[write] = val;
 			siz++;
 			write++;
