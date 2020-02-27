@@ -48,7 +48,7 @@ int main(){
 		if(apress.size() >= 5){
 			for(size_t i=0;i<5;i++)
 				send_buf[i] = global::apress.pop();
-			twe.send_buf_simple(0x01, 0x00, send_buf, sizeof(float)*5);
+			twe.send_buf_extend(0x01, 0x00, send_buf, sizeof(float)*5);
 
 			if(twe.check_send() == 1)
 				send_cnt++;
