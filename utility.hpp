@@ -1,6 +1,7 @@
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_
 
+#include "mbed.h"
 #include "CAN.h"
 
 namespace utility {
@@ -25,6 +26,7 @@ namespace utility {
 		auto front() const -> const T& { return buf[read]; }
 
 		auto push(const T &val) -> void {
+			mutex.lock();
 			if(siz == BUFSIZE)
 				return;
 			buf[write] = val;
@@ -32,17 +34,23 @@ namespace utility {
 			write++;
 			if(write == BUFSIZE)
 				write = 0;
+			mutex.unlock();
 		}
 
 		auto pop() -> T {
 			const auto &ret = buf[read];
+
+			mutex.lock();
 			siz--;
 			read++;
 			if(read == BUFSIZE)
 				read = 0;
+
+			mutex.unlock();
 			return ret;
 		}
 	protected:
+		PlatformMutex mutex;
 		size_t siz;
 		size_t read, write;
 		T buf[BUFSIZE];
