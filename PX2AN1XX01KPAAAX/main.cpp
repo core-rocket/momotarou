@@ -27,7 +27,7 @@ void send(int id, float value, char moji){
     }
     CANMessage msg(id, senddata, 5);
     if(can.write(msg)){
-        pc.printf("%d,%c\n\r", id, moji);
+        //pc.printf("%d,%c\n\r", id, moji);
     }
 }
 
@@ -42,8 +42,8 @@ int main(){
         else{
             chamberpressure = 0.0;
         }
-        pc.printf("Voltage: %f\n\r", sensorvalue);
-        pc.printf("Pressure[MPa]: %f\n\r", chamberpressure);
+        //pc.printf("Voltage: %f\n\r", sensorvalue);
+        //pc.printf("Pressure[MPa]: %f\n\r", chamberpressure);
         send(0x0A, chamberpressure, 'c');
     }
 }
