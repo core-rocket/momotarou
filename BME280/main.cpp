@@ -12,12 +12,12 @@ Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
 CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
 
 #define N 5
-float pressure_ave = 0.0; // 気圧[hPa]
-float pressure_new = 0.0;
+float pressure_ave = 0.0f; // 気圧[hPa]
+float pressure_new = 0.0f;
 float buff_p[N];
-float sum = 0.0;
+float sum = 0.0f;
 int cnt = 0;
-float tem = 0.0; // 温度[C]
+float tem = 0.0f; // 温度[C]
 char senddata[5];
 
 union Float2Byte{
@@ -33,7 +33,7 @@ void send(int id, float value, char moji){
     }
     CANMessage msg(id, senddata, 5);
     if(can.write(msg)){
-        pc.printf("%d,%c\n\r", id, moji);
+        //pc.printf("%d,%c\n\r", id, moji);
     } 
 }
 
@@ -58,10 +58,10 @@ int main(){
         
         tem = bme.getTemperature();
         
-        pc.printf("Pre[hPa]: %f\n\r", pressure_ave);
-        pc.printf("Tem[C] : %f\n\r", tem);
+        //pc.printf("Pre[hPa]: %f\n\r", pressure_ave);
+        //pc.printf("Tem[C] : %f\n\r", tem);
         send(0x03, pressure_ave, 'b');
-        send(0xA, tem, 'e');
-        wait(0.001);
+        send(0x0C, tem, 'e');
+        wait(0.0005);
     }
 }
