@@ -15,11 +15,9 @@ Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); // pin30,29 SDA,SCL
 CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
 
-//Timer timea;
-
 #define PI 3.14159265358979323846f
 #define N 5 // 5回移動平均
-#define sampleFreq 100.0f // とりあえずの値
+#define sampleFreq 100.0f
 #define beta 0.33f // gain（大きいと加速度による補正が早い）
 
 char senddata[5];
@@ -245,7 +243,7 @@ int main(){
         q1 += qdot1 * (1.0f / sampleFreq);
         q2 += qdot2 * (1.0f / sampleFreq);
         q3 += qdot3 * (1.0f / sampleFreq);
-
+        
         norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
         q0 /= norm;
         q1 /= norm;
@@ -260,19 +258,24 @@ int main(){
         //pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
         //pc.printf("gyr_ave:%f,%f,%f\n\r", gx, gy, gz);
         //pc.printf("mag_ave:%f,%f,%f\n\r", mx, my, mz);
-        pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
+        //pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
         //pc.printf("angle: %f, %f, %f\n\r", psi, cta, eta);
         //pc.printf("%f\n\r", timea.read());
         send(0x04, a_norm, 'a');
-        //send(0x07, psi, 'x');
-        //send(0x07, cta, 'y');
-        //send(0x07, eta, 'z');
+
+        send(0x07, q0, 'a');
+        send(0x07, q1, 'b');
+        send(0x07, q2, 'c');
+        send(0x07, q3, 'd');
+
         send(0x08, ax, 'x');
         send(0x08, ay, 'y');
         send(0x08, az, 'z');
+        
         send(0x09, gx, 'x');
         send(0x09, gy, 'y');
         send(0x09, gz, 'z');
+        
         send(0x0D, mx, 'x');
         send(0x0D, my, 'y');
         send(0x0D, mz, 'z');
