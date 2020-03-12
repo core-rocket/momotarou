@@ -111,7 +111,7 @@ void send(int id, float value, char moji){
     }
     CANMessage msg(id, senddata, 5);
     if(can.write(msg)){
-        pc.printf("%d,%c\n\r", id, moji);
+        //pc.printf("%d, %c\n\r", id, moji);
     }
 }
 
