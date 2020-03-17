@@ -27,7 +27,7 @@ void send(int id, float value, char moji){
     }
     CANMessage msg(id, senddata, 5);
     if(can.write(msg)){
-        pc.printf("%d,%c\n\r", id, moji);
+        //pc.printf("%d,%c\n\r", id, moji);
     }
 }
 
@@ -43,8 +43,8 @@ int main(){
             kpa = 0.0;
         }
         
-        pc.printf("sensorvalue: %f\n\r", sensorvalue);
-        pc.printf("Pressure: %f\n\r", kpa);
-        send(0x09, kpa, 'k');
+        //pc.printf("sensorvalue: %f\n\r", sensorvalue);
+        //pc.printf("Pressure: %f\n\r", kpa);
+        send(0x0B, kpa, 'k');
     }
 }
