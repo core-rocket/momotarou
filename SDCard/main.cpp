@@ -40,8 +40,22 @@ int main(){
                         fprintf(fp, "%d,%d,%d,%d,%d\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4]);                                         
                         cnt++;
                     }
+                    if(msg.id == 5 || msg.id == 7 || msg.id == 8 || msg.id == 9 || msg.id == 13){
+                        //for(int i=1;i<5;++i){
+                        //    f2b._byte[i] = msg.data[i];
+                        //}
+                        fprintf(fp, "%d,%d,%d,%d,%d,%c\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[0]);                                         
+                        cnt++;
+                    }
+                    if(msg.id == 1 || msg.id == 2 || msg.id == 6){
+                        //for(int i=1;i<5;++i){
+                        //    f2b._byte[i] = msg.data[i];
+                        //}
+                        fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);                                         
+                        cnt++;
+                    }
                 }
-                if(cnt == 100){
+                if(cnt == 1000){
                     fclose(fp);
                     break;
                 }
@@ -49,7 +63,6 @@ int main(){
         }
         else{
             pc.printf("Failed.\n\r");
-            break;
         }
     }
 }
