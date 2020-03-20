@@ -3,14 +3,22 @@
 #include "../telemetry.hpp"
 #include "../utility.hpp"
 #include "TWE-Lite/TWE-Lite.hpp"
+#include <cstddef>
+
+#define QUEUE_SIZE	10
 
 Serial pc(PA_2, PA_3, BRATE); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, CAN_SPEED);
 
 namespace global {
+	TWE_Lite twe(PA_9, PA_10, BRATE);
 	CANMessage can_msg;
 
-	utility::queue<float, 10> apress;
+	utility::queue<float, QUEUE_SIZE> apress;
+	utility::queue<float, QUEUE_SIZE> acc;
+
+	size_t send_count;
+	size_t send_error_count;
 }
 
 union Float2Byte {
@@ -20,14 +28,29 @@ union Float2Byte {
 
 void can_recv();
 
+template<typename T>
+auto send_telemetry(const size_t id, utility::queue<T, QUEUE_SIZE> data) -> void {
+	static T send_buf[QUEUE_SIZE];
+
+	if(data.size() < 5) return;
+
+	for(size_t i=0;i<5;i++)
+		send_buf[i] = data.pop();
+
+	global::twe.send_buf_extend(id, id, send_buf, sizeof(T)*5);
+	if(global::twe.check_send() == 1)
+		global::send_count++;
+	else
+		global::send_error_count++;
+}
+
 int main(){
-	TWE_Lite twe(PA_9, PA_10, BRATE);
 	Timer boot_timer;
 
 	boot_timer.start();
 
 	pc.printf("start TWE-Lite.\n\r");
-	twe.init();
+	global::twe.init();
 	can.attach(can_recv, CAN::RxIrq);
 
 	size_t loop_num = 0;
@@ -45,16 +68,9 @@ int main(){
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
 
-		if(apress.size() >= 5){
-			for(size_t i=0;i<5;i++)
-				send_buf[i] = global::apress.pop();
-			twe.send_buf_extend(0x01, 0x00, send_buf, sizeof(float)*5);
+		send_telemetry(0x01, global::apress);
+		send_telemetry(0x02, global::acc);
 
-			if(twe.check_send() == 1)
-				send_cnt++;
-			else
-				send_err++;
-		}
 		loop_num++;
 	}
 }
@@ -73,6 +89,12 @@ void can_recv(){
 		{
 			const auto *apress = (Float2Byte*)msg.data;
 			global::apress.push(apress->_float);
+		}
+		break;
+	case MsgID::acc:
+		{
+			const auto *acc = (Float2Byte*)msg.data;
+			global::acc.push(acc->_float);
 		}
 		break;
 	default:
