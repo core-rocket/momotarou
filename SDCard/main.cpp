@@ -9,28 +9,47 @@ MOSI:pin28 --- pin3 CMD
 #include "mbed.h"
 #include "SDFileSystem.h"
 
-DigitalOut myled(PB_1); //pin15
-Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
+Serial pc(PA_9, PA_10, 115200); //pin19,20 TX,RX
+SDFileSystem sd = SDFileSystem(PA_7, PA_6, PA_5, PA_4, "sd");
+CAN can(PA_11, PA_12, 1000000); //pin21,22 rd,td
 
-SDFileSystem sd = SDFileSystem(PB_5, PB_4, PB_3, PA_15, "sd"); //pin28,27,26,25
+CANMessage msg;
+
+union Float2Byte{
+    float _float;
+    char _byte[4];
+}f2b;
 
 int main(){
     wait(1.0); //気持ち
-    pc.printf("Start.\n\r");
-
-    FILE *fp = fopen("/sd/test.csv", "w");
-    //FILE *fp = fopen("/sd/test.txt", "w");
-    if(fp != NULL){
-        myled = 1;
-        pc.printf("Writing to SDcard......\n\r");
-        for(int i=1;i<10;i++){
-            fprintf(fp, "%d\n", i);
+    
+    FILE *fp = fopen("/sd/log.txt", "a");
+    fprintf(fp, "Start.\n");
+    fclose(fp);
+    while(1){
+        pc.printf("Log.\n\r");
+        FILE *fp = fopen("/sd/log.txt", "a");
+        int cnt = 0;
+        if(fp != NULL){
+            while(1){
+                if(can.read(msg)){
+                    if(msg.id == 3 || msg.id == 4 || msg.id == 10 || msg.id == 11 || msg.id == 12){
+                        //for(int i=1;i<5;++i){
+                        //    f2b._byte[i] = msg.data[i];
+                        //}
+                        fprintf(fp, "%d,%d,%d,%d,%d\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4]);                                         
+                        cnt++;
+                    }
+                }
+                if(cnt == 100){
+                    fclose(fp);
+                    break;
+                }
+            }
         }
-        fclose(fp);
-        myled = 0;
+        else{
+            pc.printf("Failed.\n\r");
+            break;
+        }
     }
-    else{
-        pc.printf("Failed.\n\r");
-    }
-    pc.printf("End.\n\r");
 }
