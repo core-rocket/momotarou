@@ -267,27 +267,32 @@ int main(){
         //eta = atan2(2.0f*q0*q3 - 2.0f*q1*q2, 2.0f*q0*q0 + 2.0f*q1*q1 - 1.0f) * 180.0f / PI;
         
         //pc.printf("a_norm:%f\n\r", a_norm);       
-        //pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
+        pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
         //pc.printf("gyr_ave:%f,%f,%f\n\r", gx, gy, gz);
         //pc.printf("mag_ave:%f,%f,%f\n\r", mx, my, mz);
         //pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
         //pc.printf("angle: %f, %f, %f\n\r", psi, cta, eta);
         //pc.printf("%f\n\r", timea.read());
-        send_nomoji(MsgID::acc_norm, a_norm);
+        
+		send_nomoji(MsgID::acc_norm, a_norm);
+		wait_us(50);
 
         send(MsgID::quaternion, q0, 'a');
         send(MsgID::quaternion, q1, 'b');
         send(MsgID::quaternion, q2, 'c');
         send(MsgID::quaternion, q3, 'd');
+		wait_us(50);
 
         send(MsgID::acc, ax, 'x');
         send(MsgID::acc, ay, 'y');
         send(MsgID::acc, az, 'z');
+		wait_us(50);
         
         send(MsgID::gyro, gx, 'x');
         send(MsgID::gyro, gy, 'y');
         send(MsgID::gyro, gz, 'z');
-        
+		wait_us(50);
+
         send(MsgID::magnetic, mx, 'x');
         send(MsgID::magnetic, my, 'y');
         send(MsgID::magnetic, mz, 'z');
