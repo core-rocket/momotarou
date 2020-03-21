@@ -28,13 +28,24 @@ union Float2Byte{
 }f2b;
 
 // CAN送信
-void send(int id, float value, char moji){
+void send_nomoji(int id, const float &value){
+    f2b._float = value;
+    for(int i=0;i<sizeof(float);++i){
+        senddata[i] = f2b._byte[i];
+    }
+    CANMessage msg(id, senddata, sizeof(float));
+    if(can.write(msg)){
+        //pc.printf("%d,%c\n\r", id, moji);
+    }
+}
+
+void send(int id, const float &value, char moji){
     senddata[0] = moji;
     f2b._float = value;
     for(int i=1;i<5;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, 5);
+    CANMessage msg(id, senddata, sizeof(float)+1);
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     } 
@@ -261,7 +272,7 @@ int main(){
         //pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
         //pc.printf("angle: %f, %f, %f\n\r", psi, cta, eta);
         //pc.printf("%f\n\r", timea.read());
-        send(0x04, a_norm, 'a');
+        send_nomoji(0x04, a_norm);
 
         send(0x07, q0, 'a');
         send(0x07, q1, 'b');
