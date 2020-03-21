@@ -15,6 +15,8 @@ CAN can(PA_11, PA_12, 1000000); //pin21,22 rd,td
 
 CANMessage msg;
 
+int buff = -1;
+
 union Float2Byte{
     float _float;
     char _byte[4];
@@ -22,47 +24,55 @@ union Float2Byte{
 
 int main(){
     wait(1.0); //気持ち
-    
+    pc.printf("Start.\n\r");
     FILE *fp = fopen("/sd/log.txt", "a");
     fprintf(fp, "Start.\n");
     fclose(fp);
     while(1){
-        pc.printf("Log.\n\r");
         FILE *fp = fopen("/sd/log.txt", "a");
         int cnt = 0;
         if(fp != NULL){
             while(1){
                 if(can.read(msg)){
                     if(msg.id == 3 || msg.id == 4 || msg.id == 10 || msg.id == 11 || msg.id == 12){
-                        //for(int i=1;i<5;++i){
-                        //    f2b._byte[i] = msg.data[i];
-                        //}
-                        fprintf(fp, "%d,%d,%d,%d,%d\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4]);                                         
+                        //printf(fp, "%d,%d,%d,%d,%d\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
+                        
+                        for(int i=1;i<5;++i){
+                            f2b._byte[i] = msg.data[i];
+                        }
+                        fprintf(fp, "%d,%f\n", msg.id, f2b._float);             
                         cnt++;
                     }
-                    if(msg.id == 5 || msg.id == 7 || msg.id == 8 || msg.id == 9 || msg.id == 13){
-                        //for(int i=1;i<5;++i){
-                        //    f2b._byte[i] = msg.data[i];
-                        //}
-                        fprintf(fp, "%d,%d,%d,%d,%d,%c\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[0]);                                         
+                    else if(msg.id == 5 || msg.id == 7 || msg.id == 8 || msg.id == 9 || msg.id == 13){
+                        //fprintf(fp, "%d,%d,%d,%d,%d,%c\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[0]);
+                        
+                        for(int i=1;i<5;++i){
+                            f2b._byte[i] = msg.data[i];
+                        }
+                        fprintf(fp, "%d,%f,%c\n", msg.id, f2b._float, msg.data[0]);
                         cnt++;
                     }
-                    if(msg.id == 1 || msg.id == 2 || msg.id == 6){
-                        //for(int i=1;i<5;++i){
-                        //    f2b._byte[i] = msg.data[i];
-                        //}
-                        fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);                                         
+                    else if(msg.id == 1 || msg.id == 2){
+                        fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);
                         cnt++;
+                    }
+                    else if(msg.id == 6){
+                        if(buff != msg.data[0]){
+                            fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);
+                            buff = msg.data[0];
+                        }
                     }
                 }
-                if(cnt == 1000){
+                if(cnt == 2000){
                     fclose(fp);
+                    //pc.printf("Save.\n\r");
                     break;
                 }
             }
         }
         else{
             pc.printf("Failed.\n\r");
+            break;
         }
     }
 }
