@@ -27,28 +27,28 @@ int main(){
     pc.printf("Init OK\n\r");
 
     while(1){
-    FILE *fp = fopen("/sd/test.csv", "a");
-    //FILE *fp = fopen("/sd/test.txt", "w");
-    mpu.readGyroData(gyr);
-    mpu.readAccelData(acc);
-    mpu.readMagData(mag);
-    if(fp != NULL){
-        myled = 1;
-        pc.printf("Writing to SDcard......\n\r");
-        for(int i=1;i<1000;i++){
-            mpu.readGyroData(gyr);
-            mpu.readAccelData(acc);
-            mpu.readMagData(mag);
-            //fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%f\n",acc[0]/2049.81,acc[1]/2049.81,acc[2]/2049.81, gyr[0]*0.03048,gyr[1]*0.03048,gyr[2]*0.03048, mag[0]*0.15,mag[1]*0.15,mag[2]*0.15);
-            fprintf(fp, "%d,%d,%d,%d,%d,%d,%d,%d,%d\n",acc[0],acc[1],acc[2], gyr[0],gyr[1],gyr[2], mag[0],mag[1],mag[2]);
+        FILE *fp = fopen("/sd/test.csv", "a");
+        //FILE *fp = fopen("/sd/test.txt", "w");
+        mpu.readGyroData(gyr);
+        mpu.readAccelData(acc);
+        mpu.readMagData(mag);
+        if(fp != NULL){
+            myled = 1;
+            pc.printf("Writing to SDcard......\n\r");
+            for(int i=1;i<1000;i++){
+                mpu.readGyroData(gyr);
+                mpu.readAccelData(acc);
+                mpu.readMagData(mag);
+                //fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%f\n",acc[0]/2049.81,acc[1]/2049.81,acc[2]/2049.81, gyr[0]*0.03048,gyr[1]*0.03048,gyr[2]*0.03048, mag[0]*0.15,mag[1]*0.15,mag[2]*0.15);
+                fprintf(fp, "%d,%d,%d,%d,%d,%d,%d,%d,%d\n",acc[0],acc[1],acc[2], gyr[0],gyr[1],gyr[2], mag[0],mag[1],mag[2]);
+            }
+            fclose(fp);
+            myled = 0;
         }
-        fclose(fp);
-        myled = 0;
-    }
-    else{
-        pc.printf("Failed.\n\r");
-    }
-    pc.printf("End.\n\r");
+        else{
+            pc.printf("Failed.\n\r");
+        }
+        pc.printf("End.\n\r");
     }
 }
 
@@ -61,7 +61,7 @@ void mpu_init(){
     pc.printf("MPU9250 IS 0x%x\n\r", whoami_MPU9250); // 0x71で正常
     pc.printf("AK8963 IS 0x%x\n\r", whoami_AK8963); // 0x48で正常
     
-    if (whoami_MPU9250 == 0x71 && whoami_AK8963 == 0x48){  
+    if (whoami_MPU9250 == 0x71 || whoami_AK8963 == 0x48){  
         pc.printf("MPU9250 is detected.\n\r");
         wait(0.1);
         mpu.resetMPU9250();

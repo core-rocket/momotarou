@@ -115,7 +115,7 @@ void BME280::initialize()
     DEBUG_PRINT("dig_H = 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x\n", dig_H1, dig_H2, dig_H3, dig_H4, dig_H5, dig_H6);
 }
  
-float BME280::getTemperature()
+int BME280::getTemperature()
 {
     uint32_t temp_raw;
     float tempf;
@@ -137,10 +137,11 @@ float BME280::getTemperature()
     temp = (temp * 5 + 128) >> 8;
     tempf = (float)temp;
  
-    return (tempf/100.0f);
+    //return (tempf/100.0f);
+    return temp;
 }
  
-float BME280::getPressure()
+int BME280::getPressure()
 {
     uint32_t press_raw;
     float pressf;
@@ -175,7 +176,8 @@ float BME280::getPressure()
     press = (press + ((var1 + var2 + dig_P7) >> 4));
  
     pressf = (float)press;
-    return (pressf/100.0f);
+    //return (pressf/100.0f);
+    return press;
 }
  
 float BME280::getHumidity()

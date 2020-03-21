@@ -114,12 +114,12 @@ public:
     /** Read the current temperature value (degree Celsius) from BME280 sensor
      *
      */
-    float getTemperature(void);
+    int getTemperature(void);
 
     /** Read the current pressure value (hectopascal)from BME280 sensor
      *
      */
-    float getPressure(void);
+    int getPressure(void);
 
     /** Read the current humidity value (humidity %) from BME280 sensor
      *

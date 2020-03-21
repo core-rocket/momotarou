@@ -12,26 +12,44 @@ MOSI:pin28 --- pin3 CMD
 
 DigitalOut myled(PB_1); //pin15
 Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
+BME280 bme = BME280(PB_7, PB_6); //pin30,29 SDA,SCL
 
-SDFileSystem sd = SDFileSystem(PB_5, PB_4, PB_3, PA_15, "sd"); //pin28,27,26,25
+SDFileSystem sd = SDFileSystem(PA_7, PA_6, PA_5, PA_4, "sd"); //MOSI,MISO,SCK,CS
 
 int main(){
+    int pre,tem;
     wait(1.0); //気持ち
     pc.printf("Start.\n\r");
+    bme.initialize();
+    pc.printf("BME_Init_OK.\n\r");
+    /*
+    while(1){
+        pre = bme.getPressure();
+        tem = bme.getTemperature();
+        pc.printf("%d,%d\n\r", pre,tem);
+        wait(1.0);
+    }
+    */
 
-    FILE *fp = fopen("/sd/test.csv", "w");
-    //FILE *fp = fopen("/sd/test.txt", "w");
-    if(fp != NULL){
-        myled = 1;
-        pc.printf("Writing to SDcard......\n\r");
-        for(int i=1;i<10;i++){
-            fprintf(fp, "%d\n", i);
+    while(1){
+        FILE *fp = fopen("/sd/BME.csv", "a");
+        //FILE *fp = fopen("/sd/test.txt", "w");
+        if(fp != NULL){
+            myled = 1;
+            pc.printf("Writing to SDcard......\n\r");
+            for(int i=0;i<30;i++){
+                pre = bme.getPressure();
+                tem = bme.getTemperature();
+                //fprintf(fp, "%d\n", i);
+                fprintf(fp,"%d,%d\n", pre,tem);
+                wait(0.05);
+            }
+            fclose(fp);
+            myled = 0;
         }
-        fclose(fp);
-        myled = 0;
+        else{
+            pc.printf("Failed.\n\r");
+        }
+        pc.printf("End.\n\r");
     }
-    else{
-        pc.printf("Failed.\n\r");
-    }
-    pc.printf("End.\n\r");
 }

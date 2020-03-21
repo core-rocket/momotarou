@@ -14,7 +14,7 @@ DigitalOut myled(PB_1); //pin15
 ADXL375_i2c adxl = ADXL375_i2c(PB_7, PB_6);
 Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
 
-SDFileSystem sd = SDFileSystem(PB_5, PB_4, PB_3, PA_15, "sd"); //pin28,27,26,25
+SDFileSystem sd = SDFileSystem(PA_7, PA_6, PA_5, PA_4, "sd"); //MOSI,MISO,SCK,CS
 
 int16_t acc[3];
 uint8_t whoami;
@@ -23,7 +23,7 @@ int main(){
     wait(1.0); //気持ち
     pc.printf("Start.\n\r");
 
-    whoami = adxl.readByte(ADXL375_I2C_HIGH_READ, ADXL375_DEVID_REG);
+    whoami = adxl.readByte(ADXL375_I2C_LOW_READ, ADXL375_DEVID_REG);
     pc.printf("I AM 0x%x\n\r", whoami); //0xE5で正常
 
     if (whoami == 0xE5){ 
@@ -39,14 +39,18 @@ int main(){
     }
 
     while(1) {  
-        FILE *fp = fopen("/sd/test.csv", "a");
+        FILE *fp = fopen("/sd/ADXL.csv", "a");
 
         if(fp != NULL){
             myled = 1;
-            adxl.readAccelData(acc);
-            //pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
-            pc.printf("Acc:%f,%f,%f\r\n",(float)acc[0]/20.5, (float)acc[1]/20.5, (float)acc[2]/20.5); 
-            fprintf(fp, "%f,%f,%f\r\n",(float)acc[0]/20.5, (float)acc[1]/20.5, (float)acc[2]/20.5);
+            for(int i=1;i<2000;i++){
+                adxl.readAccelData(acc);
+                //pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
+                //pc.printf("Acc:%f,%f,%f\r\n",(float)acc[0]/20.5, (float)acc[1]/20.5, (float)acc[2]/20.5); 
+                //fprintf(fp, "%f,%f,%f\r\n",(float)acc[0]/20.5, (float)acc[1]/20.5, (float)acc[2]/20.5);
+                fprintf(fp, "%d,%d,%d\r\n",acc[0], acc[1], acc[2]);
+            }
+            pc.printf("SD_Write\r\n");
             fclose(fp);
             myled = 0;
         }else{

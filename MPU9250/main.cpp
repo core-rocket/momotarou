@@ -7,7 +7,7 @@ SDA/SCL 10kΩでpullup
 */
 #include "mbed.h"
 #include "MPU9250.h"
-Serial pc(PA_9, PA_10, 115200); //pin19,20 TX,RX
+Serial pc(PA_9, PA_10, 9600); //pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); //pin30,29 SDA,SCL
 CAN can(PA_11, PA_12, 100000); //pin21,22 rd,td
 
