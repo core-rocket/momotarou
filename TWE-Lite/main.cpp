@@ -29,7 +29,7 @@ union Float2Byte {
 void can_recv();
 
 template<typename T>
-auto send_telemetry(const size_t id, utility::queue<T, QUEUE_SIZE> data) -> void {
+auto send_telemetry(const size_t id, utility::queue<T, QUEUE_SIZE> &data) -> void {
 	static T send_buf[QUEUE_SIZE];
 
 	if(data.size() < 5) return;
@@ -54,8 +54,8 @@ int main(){
 	can.attach(can_recv, CAN::RxIrq);
 
 	size_t loop_num = 0;
-	size_t send_cnt = 0;
-	size_t send_err = 0;
+	const auto& send_cnt = global::send_count;
+	const auto& send_err = global::send_error_count;
 	while(true){
 		const auto &apress = global::apress;
 
