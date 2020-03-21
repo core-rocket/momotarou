@@ -69,7 +69,7 @@ void BME280::initialize()
     i2c.write(address, cmd, 2);
  
     cmd[0] = 0xf5; // config
-    cmd[1] = 0xa0; // Standby 1000ms, Filter off
+    cmd[1] = 0x00; // Standby 0.5ms, Filter off
     i2c.write(address, cmd, 2);
  
     cmd[0] = 0x88; // read dig_T regs
