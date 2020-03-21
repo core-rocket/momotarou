@@ -1,0 +1,6 @@
+SDFileSystem
+.hg
+.temp
+BUILD
+mbed
+*.pyc
