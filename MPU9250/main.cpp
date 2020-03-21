@@ -12,9 +12,9 @@ SDA/SCL 10kΩでpullup
 #include "MPU9250.h"
 #include "../common.h"
 
-Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
+Serial pc(PA_9, PA_10, BRATE); // pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); // pin30,29 SDA,SCL
-CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
+CAN can(PA_11, PA_12, CAN_SPEED); // pin21,22 rd,td
 
 #define PI 3.14159265358979323846f
 #define N 5 // 5回移動平均
@@ -291,6 +291,6 @@ int main(){
         send(MsgID::magnetic, mx, 'x');
         send(MsgID::magnetic, my, 'y');
         send(MsgID::magnetic, mz, 'z');
-        //wait(0.001);
+        wait(0.001);
     }
 }
