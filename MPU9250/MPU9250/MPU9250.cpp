@@ -114,8 +114,10 @@ void MPU9250::readAccelData(int16_t * destination)
   readBytes(MPU9250_ADDRESS, ACCEL_XOUT_H, 6, &rawData[0]);  // Read the six raw data registers into data array
   destination[0] = (int16_t)(((int16_t)rawData[0] << 8) | rawData[1]) ;  // Turn the MSB and LSB into a signed 16-bit value
   destination[1] = (int16_t)(((int16_t)rawData[2] << 8) | rawData[3]) ;  
-  destination[2] = (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ; 
+  destination[2] = (int16_t)(((int16_t)rawData[4] << 8) | rawData[5]) ;
+   
 }
+
 
 void MPU9250::readGyroData(int16_t * destination)
 {
@@ -138,6 +140,16 @@ void MPU9250::readMagData(int16_t * destination)
     destination[2] = (int16_t)(((int16_t)rawData[5] << 8) | rawData[4]) ; 
    }
   }
+}
+
+void MPU9250::readAccelData_Float(float * destination)
+{
+  uint8_t rawData[6];  // x/y/z accel register data stored here
+  readBytes(MPU9250_ADDRESS, ACCEL_XOUT_H, 6, &rawData[0]);  // Read the six raw data registers into data array
+  destination[0] = (int16_t)(((int16_t)rawData[0] << 8) | rawData[1])*aRes;  // Turn the MSB and LSB into a signed 16-bit value
+  destination[1] = (int16_t)(((int16_t)rawData[2] << 8) | rawData[3])*aRes;  
+  destination[2] = (int16_t)(((int16_t)rawData[4] << 8) | rawData[5])*aRes;
+   
 }
 
 int16_t MPU9250::readTempData()
