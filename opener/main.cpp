@@ -221,7 +221,7 @@ void parse_cmd(const CANMessage &msg){
 		}
 		break;
 	case Cmd::launch_clear:	// ランチクリア確認コマンド
-		if(phase == Phase::standby){
+		if(phase == Phase::flight){
 			global::flag_manual_launch_clear = true;
 		}
 		break;
