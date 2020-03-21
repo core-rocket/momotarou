@@ -64,7 +64,7 @@ int main(){
 
 		float send_buf[10];
 
-		if(loop_num % 10000 == 0){
+		if(loop_num % 100000 == 0){
 			pc.printf("queue=%02d,%02d,%02d err=%d ", apress.size(), acc_norm.size(), temperature.size(), send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
@@ -113,8 +113,22 @@ void can_recv(){
 			global::temperature.push(temperature->_float);
 		}
 		break;
+	case MsgID::quaternion:
+		{
+			const auto *data = (Float2Byte*)(msg.data+1);
+			switch(msg.data[0]){
+			case 'a': break;
+			case 'b': break;
+			case 'c': break;
+			case 'd': break;
+			default:
+				pc.printf("error: unknwon moji: %c\r\n", msg.data[0]);
+				break;
+			}
+		}
+		break;
 	default:
-		//pc.printf("%x\r\n", msg.id);
+		pc.printf("%x\r\n", msg.id);
 		break;
 	}
 }
