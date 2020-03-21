@@ -7,6 +7,8 @@ SDO : LOW
 */
 #include "mbed.h"
 #include "BME280.h"
+#include "../common.h"
+
 BME280 bme = BME280(PB_7, PB_6); // pin30,29 SDA,SCL
 Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
 CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
@@ -25,12 +27,12 @@ union Float2Byte{
     char _byte[4];
 }f2b;
 
-void send(int id, float value){
+void send(const MsgID id, float value){
     f2b._float = value;
     for(int i=0;i<4;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, sizeof(float));
+    CANMessage msg(static_cast<uint8_t>(id), senddata, sizeof(float));
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     } 
@@ -59,8 +61,8 @@ int main(){
         
         //pc.printf("Pre[hPa]: %f\n\r", pressure_ave);
         //pc.printf("Tem[C] : %f\n\r", tem);
-        send(0x03, pressure_ave);
-        send(0x0C, tem);
+        send(MsgID::air_press, pressure_ave);
+        send(MsgID::temperature, tem);
         wait(0.0005);
     }
 }
