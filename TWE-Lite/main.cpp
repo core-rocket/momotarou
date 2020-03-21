@@ -5,7 +5,7 @@
 #include "TWE-Lite/TWE-Lite.hpp"
 #include <cstddef>
 
-#define QUEUE_SIZE	10
+#define QUEUE_SIZE	15
 
 Serial pc(PA_2, PA_3, BRATE); //pin8,9 TX,RX
 CAN can(PA_11, PA_12, CAN_SPEED);
@@ -29,15 +29,15 @@ union Float2Byte {
 void can_recv();
 
 template<typename T>
-auto send_telemetry(const size_t &id, const size_t &res_id, utility::queue<T, QUEUE_SIZE> &data) -> void {
+auto send_telemetry(const size_t &id, const size_t &res_id, utility::queue<T, QUEUE_SIZE> &data, const size_t &size) -> void {
 	static T send_buf[QUEUE_SIZE];
 
-	if(data.size() < 5) return;
+	if(data.size() < size) return;
 
-	for(size_t i=0;i<5;i++)
+	for(size_t i=0;i<size;i++)
 		send_buf[i] = data.pop();
 
-	global::twe.send_buf_extend(id, res_id, send_buf, sizeof(T)*5);
+	global::twe.send_buf_extend(id, res_id, send_buf, sizeof(T)*size);
 	if(global::twe.check_send() == 1)
 		global::send_count++;
 	else
@@ -63,14 +63,14 @@ int main(){
 		float send_buf[10];
 
 		if(loop_num % 10000 == 0){
-			pc.printf("queue=%d,%d err=%d ", apress.size(), acc.size(), send_err);
+			pc.printf("queue=%02d,%02d err=%d ", apress.size(), acc.size(), send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
 
-		send_telemetry(0x01, 0x01, global::apress);
-		send_telemetry(0x01, 0x02, global::acc);
+		send_telemetry(0x01, 0x01, global::apress, 10);
+		send_telemetry(0x01, 0x02, global::acc, 10);
 
 		loop_num++;
 	}
