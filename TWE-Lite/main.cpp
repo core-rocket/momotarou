@@ -15,7 +15,7 @@ namespace global {
 	CANMessage can_msg;
 
 	utility::queue<float, QUEUE_SIZE> apress;
-	utility::queue<float, QUEUE_SIZE> acc;
+	utility::queue<float, QUEUE_SIZE> acc_norm;
 
 	size_t send_count;
 	size_t send_error_count;
@@ -58,19 +58,19 @@ int main(){
 	const auto& send_err = global::send_error_count;
 	while(true){
 		const auto &apress = global::apress;
-		const auto &acc = global::acc;
+		const auto &acc_norm = global::acc_norm;
 
 		float send_buf[10];
 
 		if(loop_num % 10000 == 0){
-			pc.printf("queue=%02d,%02d err=%d ", apress.size(), acc.size(), send_err);
+			pc.printf("queue=%02d,%02d err=%d ", apress.size(), acc_norm.size(), send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
 
 		send_telemetry(0x01, 0x01, global::apress, 10);
-		send_telemetry(0x01, 0x02, global::acc, 10);
+		send_telemetry(0x01, 0x02, global::acc_norm, 10);
 
 		loop_num++;
 	}
@@ -92,10 +92,10 @@ void can_recv(){
 			global::apress.push(apress->_float);
 		}
 		break;
-	case MsgID::acc:
+	case MsgID::acc_norm:
 		{
-			const auto *acc = (Float2Byte*)msg.data;
-			global::acc.push(acc->_float);
+			const auto *acc_norm = (Float2Byte*)msg.data;
+			global::acc_norm.push(acc_norm->_float);
 		}
 		break;
 	default:
