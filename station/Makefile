@@ -1,2 +1,2 @@
 default:
-	$(CXX) -o station main.cc
+	$(CXX) -o station main.cc -lpthread
