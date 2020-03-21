@@ -16,6 +16,7 @@ namespace global {
 
 	utility::queue<float, QUEUE_SIZE> apress;
 	utility::queue<float, QUEUE_SIZE> acc_norm;
+	utility::queue<float, QUEUE_SIZE> temperature;
 
 	size_t send_count;
 	size_t send_error_count;
@@ -38,10 +39,10 @@ auto send_telemetry(const size_t &id, const size_t &res_id, utility::queue<T, QU
 		send_buf[i] = data.pop();
 
 	global::twe.send_buf_extend(id, res_id, send_buf, sizeof(T)*size);
-	if(global::twe.check_send() == 1)
+//	if(global::twe.check_send() == 1)
 		global::send_count++;
-	else
-		global::send_error_count++;
+//	else
+//		global::send_error_count++;
 }
 
 int main(){
@@ -59,18 +60,20 @@ int main(){
 	while(true){
 		const auto &apress = global::apress;
 		const auto &acc_norm = global::acc_norm;
+		const auto &temperature = global::temperature;
 
 		float send_buf[10];
 
 		if(loop_num % 10000 == 0){
-			pc.printf("queue=%02d,%02d err=%d ", apress.size(), acc_norm.size(), send_err);
+			pc.printf("queue=%02d,%02d,%02d err=%d ", apress.size(), acc_norm.size(), temperature.size(), send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
 
-		send_telemetry(0x01, 0x01, global::apress, 10);
-		send_telemetry(0x01, 0x02, global::acc_norm, 10);
+		send_telemetry(0x01, 0x01, global::apress, 15);
+		send_telemetry(0x01, 0x02, global::acc_norm, 15);
+		send_telemetry(0x01, 0x03, global::temperature, 15);
 
 		loop_num++;
 	}
@@ -86,6 +89,10 @@ void can_recv(){
 	const auto &msg = global::can_msg;
 
 	switch(static_cast<MsgID>(msg.id)){
+	case MsgID::command:
+		break;
+	case MsgID::error:
+		break;
 	case MsgID::air_press:
 		{
 			const auto *apress = (Float2Byte*)msg.data;
@@ -98,7 +105,16 @@ void can_recv(){
 			global::acc_norm.push(acc_norm->_float);
 		}
 		break;
+	case MsgID::phase:
+		break;
+	case MsgID::temperature:
+		{
+			const auto *temperature = (Float2Byte*)msg.data;
+			global::temperature.push(temperature->_float);
+		}
+		break;
 	default:
+		//pc.printf("%x\r\n", msg.id);
 		break;
 	}
 }
