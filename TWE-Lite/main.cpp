@@ -18,6 +18,12 @@ namespace global {
 	utility::queue<float, QUEUE_SIZE> acc_norm;
 	utility::queue<float, QUEUE_SIZE> temperature;
 
+	struct Vector {
+		utility::queue<float, QUEUE_SIZE> x, y, z;
+	};
+
+	Vector acc, gyro;
+
 	size_t send_count;
 	size_t send_error_count;
 }
@@ -62,10 +68,15 @@ int main(){
 		const auto &acc_norm = global::acc_norm;
 		const auto &temperature = global::temperature;
 
+		const auto &acc = global::acc;
+
 		float send_buf[10];
 
-		if(loop_num % 100000 == 0){
-			pc.printf("queue=%02d,%02d,%02d err=%d ", apress.size(), acc_norm.size(), temperature.size(), send_err);
+		if(loop_num % 10000 == 0){
+			pc.printf("queue=%02d,%02d,%02d,%03d err=%d ",
+					apress.size(), acc_norm.size(), temperature.size(),
+					acc.x.size()+acc.y.size()+acc.z.size(),
+					send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
@@ -74,6 +85,10 @@ int main(){
 		send_telemetry(0x01, 0x01, global::apress, 15);
 		send_telemetry(0x01, 0x02, global::acc_norm, 15);
 		send_telemetry(0x01, 0x03, global::temperature, 15);
+
+		send_telemetry(0x01, 0x05, global::acc.x, 15);
+		send_telemetry(0x01, 0x06, global::acc.y, 15);
+		send_telemetry(0x01, 0x07, global::acc.z, 15);
 
 		loop_num++;
 	}
@@ -130,10 +145,11 @@ void can_recv(){
 	case MsgID::acc:
 		{
 			const auto *data = (Float2Byte*)(msg.data+1);
+			const auto &f = data->_float;
 			switch(msg.data[0]){
-			case 'x': break;
-			case 'y': break;
-			case 'z': break;
+			case 'x': global::acc.x.push(f); break;
+			case 'y': global::acc.y.push(f); break;
+			case 'z': global::acc.z.push(f); break;
 			default:
 				pc.printf("error: unknown moji: %c\r\n", msg.data[0]);
 				break;
