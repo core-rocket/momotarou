@@ -200,6 +200,7 @@ class MPU9250 {
          void readAccelData(int16_t * destination);
          void readGyroData(int16_t * destination);
          void readMagData(int16_t * destination);
+         void readAccelData_Float(float * destination);
          int16_t readTempData();
          void resetMPU9250();
          void initAK8963(float * destination);
