@@ -10,6 +10,7 @@ SDA/SCL 10kΩでpullup
 */
 #include "mbed.h"
 #include "MPU9250.h"
+#include "../common.h"
 
 Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); // pin30,29 SDA,SCL
@@ -28,24 +29,24 @@ union Float2Byte{
 }f2b;
 
 // CAN送信
-void send_nomoji(int id, const float &value){
+void send_nomoji(const MsgID &id, const float &value){
     f2b._float = value;
     for(int i=0;i<sizeof(float);++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, sizeof(float));
+    CANMessage msg(static_cast<uint8_t>(id), senddata, sizeof(float));
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     }
 }
 
-void send(int id, const float &value, char moji){
+void send(const MsgID &id, const float &value, char moji){
     senddata[0] = moji;
     f2b._float = value;
     for(int i=1;i<5;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, sizeof(float)+1);
+    CANMessage msg(static_cast<uint8_t>(id), senddata, sizeof(float)+1);
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     } 
@@ -272,24 +273,24 @@ int main(){
         //pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
         //pc.printf("angle: %f, %f, %f\n\r", psi, cta, eta);
         //pc.printf("%f\n\r", timea.read());
-        send_nomoji(0x04, a_norm);
+        send_nomoji(MsgID::acc_norm, a_norm);
 
-        send(0x07, q0, 'a');
-        send(0x07, q1, 'b');
-        send(0x07, q2, 'c');
-        send(0x07, q3, 'd');
+        send(MsgID::quaternion, q0, 'a');
+        send(MsgID::quaternion, q1, 'b');
+        send(MsgID::quaternion, q2, 'c');
+        send(MsgID::quaternion, q3, 'd');
 
-        send(0x08, ax, 'x');
-        send(0x08, ay, 'y');
-        send(0x08, az, 'z');
+        send(MsgID::acc, ax, 'x');
+        send(MsgID::acc, ay, 'y');
+        send(MsgID::acc, az, 'z');
         
-        send(0x09, gx, 'x');
-        send(0x09, gy, 'y');
-        send(0x09, gz, 'z');
+        send(MsgID::gyro, gx, 'x');
+        send(MsgID::gyro, gy, 'y');
+        send(MsgID::gyro, gz, 'z');
         
-        send(0x0D, mx, 'x');
-        send(0x0D, my, 'y');
-        send(0x0D, mz, 'z');
+        send(MsgID::magnetic, mx, 'x');
+        send(MsgID::magnetic, my, 'y');
+        send(MsgID::magnetic, mz, 'z');
         //wait(0.001);
     }
 }
