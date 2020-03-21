@@ -25,13 +25,12 @@ union Float2Byte{
     char _byte[4];
 }f2b;
 
-void send(int id, float value, char moji){
-    senddata[0] = moji;
+void send(int id, float value){
     f2b._float = value;
-    for(int i=1;i<5;++i){
+    for(int i=0;i<4;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, 5);
+    CANMessage msg(id, senddata, sizeof(float));
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     } 
@@ -60,8 +59,8 @@ int main(){
         
         //pc.printf("Pre[hPa]: %f\n\r", pressure_ave);
         //pc.printf("Tem[C] : %f\n\r", tem);
-        send(0x03, pressure_ave, 'b');
-        send(0x0C, tem, 'e');
+        send(0x03, pressure_ave);
+        send(0x0C, tem);
         wait(0.0005);
     }
 }
