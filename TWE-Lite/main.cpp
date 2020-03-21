@@ -29,7 +29,7 @@ union Float2Byte {
 void can_recv();
 
 template<typename T>
-auto send_telemetry(const size_t id, utility::queue<T, QUEUE_SIZE> &data) -> void {
+auto send_telemetry(const size_t &id, const size_t &res_id, utility::queue<T, QUEUE_SIZE> &data) -> void {
 	static T send_buf[QUEUE_SIZE];
 
 	if(data.size() < 5) return;
@@ -37,7 +37,7 @@ auto send_telemetry(const size_t id, utility::queue<T, QUEUE_SIZE> &data) -> voi
 	for(size_t i=0;i<5;i++)
 		send_buf[i] = data.pop();
 
-	global::twe.send_buf_extend(id, id, send_buf, sizeof(T)*5);
+	global::twe.send_buf_extend(id, res_id, send_buf, sizeof(T)*5);
 	if(global::twe.check_send() == 1)
 		global::send_count++;
 	else
@@ -58,18 +58,19 @@ int main(){
 	const auto& send_err = global::send_error_count;
 	while(true){
 		const auto &apress = global::apress;
+		const auto &acc = global::acc;
 
 		float send_buf[10];
 
 		if(loop_num % 10000 == 0){
-			pc.printf("queue=%d err=%d ", apress.size(), send_err);
+			pc.printf("queue=%d,%d err=%d ", apress.size(), acc.size(), send_err);
 			const auto send_kb = 5.0 * send_cnt * sizeof(float) / 1024;
 			const auto time_sec = boot_timer.read_ms() / 1000.0;
 			pc.printf("%f kbps\r\n", send_kb*8/time_sec);
 		}
 
-		send_telemetry(0x01, global::apress);
-		send_telemetry(0x02, global::acc);
+		send_telemetry(0x01, 0x01, global::apress);
+		send_telemetry(0x01, 0x02, global::acc);
 
 		loop_num++;
 	}
