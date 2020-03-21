@@ -27,7 +27,8 @@ int main() {
 
     while(1) {        
         adxl.readAccelData(acc);
-        pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]); 
+        pc.printf("Acc: %d, %d, %d\n\r", acc[0], acc[1], acc[2]);
+        pc.printf("Acc:%f,%f,%f\r\n",(float)acc[0]/20.5, (float)acc[1]/20.5, (float)acc[2]/20.5); 
         wait(1);
     }
 }
