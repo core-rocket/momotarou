@@ -127,8 +127,21 @@ void can_recv(){
 			}
 		}
 		break;
+	case MsgID::gyro:
+		{
+			const auto *data = (Float2Byte*)(msg.data+1);
+			switch(msg.data[0]){
+			case 'x': break;
+			case 'y': break;
+			case 'z': break;
+			default:
+				pc.printf("errir: unknwon moji: %c\r\n", msg.data[0]);
+				break;
+			}
+		}
+		break;
 	default:
-		pc.printf("%x\r\n", msg.id);
+		//pc.printf("%x\r\n", msg.id);
 		break;
 	}
 }
