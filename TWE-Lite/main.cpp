@@ -127,6 +127,19 @@ void can_recv(){
 			}
 		}
 		break;
+	case MsgID::acc:
+		{
+			const auto *data = (Float2Byte*)(msg.data+1);
+			switch(msg.data[0]){
+			case 'x': break;
+			case 'y': break;
+			case 'z': break;
+			default:
+				pc.printf("error: unknown moji: %c\r\n", msg.data[0]);
+				break;
+			}
+		}
+		break;
 	case MsgID::gyro:
 		{
 			const auto *data = (Float2Byte*)(msg.data+1);
