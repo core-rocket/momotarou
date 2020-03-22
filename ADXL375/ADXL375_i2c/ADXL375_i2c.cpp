@@ -1,3 +1,7 @@
+/*This file edit by sassy.
+2019/10/25
+degmyb.5534g@gmail.com
+*/
 #include "ADXL375_i2c.h"
 
 ADXL375_i2c::ADXL375_i2c(PinName sda, PinName scl)
