@@ -22,7 +22,7 @@ enum class MsgID : unsigned int {	// 29bit identifier
 	quaternion,
 	acc,
 	gyro,
-	burn_press,
+	burn_press = 0x0A,
 	dynamic_press,
 	temperature,
 	magnetic,
