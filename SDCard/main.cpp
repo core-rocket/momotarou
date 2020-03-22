@@ -23,7 +23,7 @@ union Float2Byte{
 }f2b;
 
 int main(){
-    wait(1.0); //気持ち
+    wait(0.1); //気持ち
     pc.printf("Start.\n\r");
     FILE *fp = fopen("/sd/log.txt", "a");
     fprintf(fp, "Start.\n");
@@ -34,15 +34,17 @@ int main(){
         if(fp != NULL){
             while(1){
                 if(can.read(msg)){
+                    //moji nashi
                     if(msg.id == 3 || msg.id == 4 || msg.id == 10 || msg.id == 11 || msg.id == 12){
                         //printf(fp, "%d,%d,%d,%d,%d\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
                         
-                        for(int i=1;i<5;++i){
+                        for(int i=0;i<4;++i){
                             f2b._byte[i] = msg.data[i];
                         }
                         fprintf(fp, "%d,%f\n", msg.id, f2b._float);             
                         cnt++;
                     }
+                    //moji ari
                     else if(msg.id == 5 || msg.id == 7 || msg.id == 8 || msg.id == 9 || msg.id == 13){
                         //fprintf(fp, "%d,%d,%d,%d,%d,%c\n", msg.id, msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[0]);
                         
@@ -52,10 +54,12 @@ int main(){
                         fprintf(fp, "%d,%f,%c\n", msg.id, f2b._float, msg.data[0]);
                         cnt++;
                     }
+                    //1byte
                     else if(msg.id == 1 || msg.id == 2){
                         fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);
                         cnt++;
                     }
+                    //phase
                     else if(msg.id == 6){
                         if(buff != msg.data[0]){
                             fprintf(fp, "%d,%d\n", msg.id, msg.data[0]);
