@@ -1,4 +1,7 @@
 /*
+mbedCLIでcompileすると容量大きくて書き込めないのでオンラインコンパイラでcompileしてる．
+(floatでSDに書き込みたい時)
+
 SDカードに整数を書き込む．
 <pin接続>
 NSS: pin25 --- pin2 CD/DAT3
@@ -26,8 +29,14 @@ int main(){
     wait(0.1); //気持ち
     pc.printf("Start.\n\r");
     FILE *fp = fopen("/sd/log.txt", "a");
-    fprintf(fp, "Start.\n");
-    fclose(fp);
+    if(fp != NULL){
+        fprintf(fp, "Start.\n");
+        fclose(fp);
+    }
+    else{
+        pc.printf("Failed.\n\r");
+    }
+    
     while(1){
         FILE *fp = fopen("/sd/log.txt", "a");
         int cnt = 0;
@@ -76,7 +85,6 @@ int main(){
         }
         else{
             pc.printf("Failed.\n\r");
-            break;
         }
     }
 }
