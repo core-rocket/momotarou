@@ -10,10 +10,11 @@ SDA/SCL 10kΩでpullup
 */
 #include "mbed.h"
 #include "MPU9250.h"
+#include "../common.h"
 
-Serial pc(PA_9, PA_10, 115200); // pin19,20 TX,RX
+Serial pc(PA_9, PA_10, BRATE); // pin19,20 TX,RX
 MPU9250 mpu = MPU9250(PB_7, PB_6); // pin30,29 SDA,SCL
-CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
+CAN can(PA_11, PA_12, CAN_SPEED); // pin21,22 rd,td
 
 #define PI 3.14159265358979323846f
 #define N 5 // 5回移動平均
@@ -28,13 +29,24 @@ union Float2Byte{
 }f2b;
 
 // CAN送信
-void send(int id, float value, char moji){
+void send_nomoji(const MsgID &id, const float &value){
+    f2b._float = value;
+    for(int i=0;i<sizeof(float);++i){
+        senddata[i] = f2b._byte[i];
+    }
+    CANMessage msg(static_cast<uint8_t>(id), senddata, sizeof(float));
+    if(can.write(msg)){
+        //pc.printf("%d,%c\n\r", id, moji);
+    }
+}
+
+void send(const MsgID &id, const float &value, char moji){
     senddata[0] = moji;
     f2b._float = value;
     for(int i=1;i<5;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, 5);
+    CANMessage msg(static_cast<uint8_t>(id), senddata, sizeof(float)+1);
     if(can.write(msg)){
         //pc.printf("%d,%c\n\r", id, moji);
     } 
@@ -255,30 +267,35 @@ int main(){
         //eta = atan2(2.0f*q0*q3 - 2.0f*q1*q2, 2.0f*q0*q0 + 2.0f*q1*q1 - 1.0f) * 180.0f / PI;
         
         //pc.printf("a_norm:%f\n\r", a_norm);       
-        //pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
+        pc.printf("acc_ave:%f,%f,%f\n\r", ax, ay, az);
         //pc.printf("gyr_ave:%f,%f,%f\n\r", gx, gy, gz);
         //pc.printf("mag_ave:%f,%f,%f\n\r", mx, my, mz);
         //pc.printf("%f,%f,%f,%f\n\r", q0, q1, q2, q3);
         //pc.printf("angle: %f, %f, %f\n\r", psi, cta, eta);
         //pc.printf("%f\n\r", timea.read());
-        send(0x04, a_norm, 'a');
-
-        send(0x07, q0, 'a');
-        send(0x07, q1, 'b');
-        send(0x07, q2, 'c');
-        send(0x07, q3, 'd');
-
-        send(0x08, ax, 'x');
-        send(0x08, ay, 'y');
-        send(0x08, az, 'z');
         
-        send(0x09, gx, 'x');
-        send(0x09, gy, 'y');
-        send(0x09, gz, 'z');
+		send_nomoji(MsgID::acc_norm, a_norm);
+		wait_us(50);
+
+        send(MsgID::quaternion, q0, 'a');
+        send(MsgID::quaternion, q1, 'b');
+        send(MsgID::quaternion, q2, 'c');
+        send(MsgID::quaternion, q3, 'd');
+		wait_us(50);
+
+        send(MsgID::acc, ax, 'x');
+        send(MsgID::acc, ay, 'y');
+        send(MsgID::acc, az, 'z');
+		wait_us(50);
         
-        send(0x0D, mx, 'x');
-        send(0x0D, my, 'y');
-        send(0x0D, mz, 'z');
-        //wait(0.001);
+        send(MsgID::gyro, gx, 'x');
+        send(MsgID::gyro, gy, 'y');
+        send(MsgID::gyro, gz, 'z');
+		wait_us(50);
+
+        send(MsgID::magnetic, mx, 'x');
+        send(MsgID::magnetic, my, 'y');
+        send(MsgID::magnetic, mz, 'z');
+        wait(0.001);
     }
 }
