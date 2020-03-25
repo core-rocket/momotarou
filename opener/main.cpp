@@ -5,7 +5,7 @@
 
 #define DEBUG
 
-#define ACC_NORM_CHECK_VALUE	  1.2
+#define ACC_NORM_CHECK_VALUE	  3.0
 #define ACC_NUM_CHECK			    5
 #define DOWN_NUM_CHECK			   10
 #define BURNING_TIMEOUT_MS		 5000
