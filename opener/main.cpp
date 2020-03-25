@@ -5,7 +5,7 @@
 
 #define DEBUG
 
-#define ACC_NORM_CHECK_VALUE	  3.0
+#define ACC_NORM_CHECK_VALUE	  1.2
 #define ACC_NUM_CHECK			    5
 #define DOWN_NUM_CHECK			   10
 #define BURNING_TIMEOUT_MS		 5000
@@ -168,7 +168,7 @@ void can_recv(){
 		break;
 	case MsgID::error:
 		break;
-	case MsgID::acc:
+	case MsgID::acc_norm:
 		// push to FIFO
 		{
 			const Float2Byte *acc = (Float2Byte*)msg.data;
