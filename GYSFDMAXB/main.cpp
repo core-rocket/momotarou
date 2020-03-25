@@ -2,6 +2,8 @@
 GYSFDMAXBから位置情報・時刻を取得してCAN送信・シリアル送信．
 */
 #include "mbed.h"
+#include "../common.h"
+
 Serial gps(PA_9, PA_10, 9600); // pin19,20 TX,RX
 Serial pc(PA_2, PA_3, 115200); // pin8,9 TX,RX
 CAN can(PA_11, PA_12, 1000000); // pin21,22 rd,td
@@ -103,13 +105,13 @@ void GetGPS(){
     }
 }
 
-void send(int id, float value, char moji){
+void send(const MsgID &id, const float &value, char moji){
     senddata[0] = moji;
     f2b._float = value;
     for(int i=1;i<5;++i){
         senddata[i] = f2b._byte[i];
     }
-    CANMessage msg(id, senddata, 5);
+    CANMessage msg(static_cast<uint8_t>(id), senddata, 5);
     if(can.write(msg)){
         //pc.printf("%d, %c\n\r", id, moji);
     }
@@ -135,9 +137,9 @@ int main(){
         //ht = ht + 9; // UTC->JST
         
         pc.printf("%f, %f, %f\n\r", lat, lon, time_g);
-        send(0x05, lat, 'a');
-        send(0x05, lon, 'o');
-        send(0x05, time_g, 't');
+        send(MsgID::gps, lat, 'a');
+        send(MsgID::gps, lon, 'o');
+        send(MsgID::gps, time_g, 't');
         //wait(0.1);
     }
 }
