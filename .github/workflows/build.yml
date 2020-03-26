@@ -1,0 +1,33 @@
+name: build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install Depend Packages
+      run: |
+        sudo apt install python2.7 python-pip gcc-arm-none-eabi mercurial git parallel
+        which arm-none-eabi-gcc
+    - name: Install and Config Mbed CLI
+      run: |
+        sudo pip install mbed-cli
+        sudo pip install jsonschema paramiko pyelftools
+        sudo pip install -r requirements.txt
+        mbed config --global GCC_ARM_PATH "/usr/bin/"
+    - name: Build
+      run: ./ci.sh
+    - name: Slack notification
+      uses: homoluctus/slatify@master
+      if: always()
+      with:
+        type: ${{ job.status }}
+        username: GitHub Actions
+        job_name: "*Build test*"
+        icon_emoji: "octcat"
+        channel: "#ci"
+        mention_if: "failure"
+        url: ${{ secrets.SLACK_WEBHOOK }}
